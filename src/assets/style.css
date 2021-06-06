@@ -1,7 +1,36 @@
 .mx-10{
-    margin: 0 10px;
+    margin-left:  10px;
+    margin-right: 10px;
+}
+
+.my-10{
+    margin-top:  10px;
+    margin-bottom: 10px;
+}
+
+.px-10{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.py-10{
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.w-250{
+    width: 250px;
+}
+
+.border-standard{
+    border: 1px solid rgb(65, 64, 64);
+    border-radius: 5px;
 }
 
 .h-100{
     height:100px
+}
+
+.d-flex{
+    display: flex;
 }

@@ -1,18 +1,17 @@
 <template>
   <div>
-    <AddressInput
-      :refLabel="'originAddress'"
-      placeholderLabel="From"
-      :cssClass="['mx-10', 'h-100']"
-    />
+    <UserUI />
+    <GoogleMap />
   </div>
 </template>
 <script>
-import AddressInput from "@/components/AddressInput";
+import GoogleMap from "@/components/GoogleMap";
+import UserUI from "@/view/UserUI";
 export default {
   name: "Home",
   components: {
-    AddressInput,
+    UserUI,
+    GoogleMap,
   },
 };
 </script>

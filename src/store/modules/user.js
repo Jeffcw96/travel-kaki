@@ -1,22 +1,28 @@
+import Vue from 'vue'
 export default function user(http) {
     const state = {
-        number: 15,
-        profile: {}
+        origin: {},
+        destination: {},
     }
 
     const getters = {
-        getNumber(state) {
-            return state.number
+        getOriginPos(state) {
+            return state.position.origin
         },
-        getProfile(state) {
-            return state.profile
-        }
+        getDestinationPos(state) {
+            return state.position.destination
+        },
 
     }
 
     const mutations = {
-        setNumber(state, data) {
-            state.number = data
+        updatePosition(state, { refLabel, lat, lng }) {
+            for (const [key, _] of Object.entries(state)) {
+                if (key === refLabel) {
+                    Vue.set(state[key], 'lat', lat)
+                    Vue.set(state[key], 'lng', lng)
+                }
+            }
         },
         setProfile(state, data) {
             state.profile = data

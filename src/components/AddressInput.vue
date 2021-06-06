@@ -10,6 +10,7 @@
   </div>
 </template>
 <script>
+import { mapMutations } from "vuex";
 export default {
   name: "AddressInput",
   props: {
@@ -27,10 +28,17 @@ export default {
     },
   },
   data() {
-    return {};
+    return {
+      addressLat: null,
+      addressLng: null,
+    };
   },
   methods: {
+    ...mapMutations(["user/updatePosition"]),
     handleInput({ target }) {},
+    handleAddressInput() {
+      console.log("autocomplete", this.autocomplete.getPlace());
+    },
   },
   computed: {
     classes() {
@@ -44,6 +52,13 @@ export default {
         bounds: new google.maps.LatLngBounds(new google.maps.LatLng()),
       }
     );
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      this["user/updatePosition"]({ refLabel: this.refLabel, lat, lng });
+    });
   },
 };
 </script>
