@@ -1,8 +1,11 @@
 import Vue from 'vue'
+import { HerokuProxy, GoogleEndPoint, APIKey } from '@/enum/common'
 export default function user(http) {
     const state = {
         origin: {},
         destination: {},
+        originAddress: "",
+        destinationAddress: "",
     }
 
     const getters = {
@@ -12,13 +15,17 @@ export default function user(http) {
         getDestinationPos(state) {
             return state.position.destination
         },
+        getAddresses(state) {
+            return { originAddress: state.originAddress, destinationAddress: state.destinationAddress }
+        }
 
     }
 
     const mutations = {
-        updatePosition(state, { refLabel, lat, lng }) {
+        updatePosition(state, { refLabel, lat, lng, placeId, address }) {
             for (const [key, _] of Object.entries(state)) {
                 if (key === refLabel) {
+                    Vue.set(state[key], 'placeId', placeId)
                     Vue.set(state[key], 'lat', lat)
                     Vue.set(state[key], 'lng', lng)
                 }
@@ -30,8 +37,12 @@ export default function user(http) {
     }
 
     const actions = {
-        addNumber({ commit }, data) {
-            commit("setNumber", data)
+        async findDistance({ commit, state }) {
+            const URL = HerokuProxy + GoogleEndPoint + `/distancematrix/json?origins=place_id:${state.origin.placeId}&destinations=place_id:${state.destination.placeId}&key=${APIKey}`
+            return http.get(URL)
+
+
+
         },
 
         async getGithubProfileDetail({ commit }, data) {

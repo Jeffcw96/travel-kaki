@@ -2,6 +2,7 @@
   <div ref="map" id="map"></div>
 </template>
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "GoogleMap",
   methods: {
@@ -25,6 +26,12 @@ export default {
       });
     },
   },
+  computed: {
+    ...mapGetters(["user/getAddresses"]),
+    getAddresses() {
+      return this["user/getAddresses"];
+    },
+  },
   async mounted() {
     const { latitude, longitude } = await this.currentLatAndLong();
     const map = new google.maps.Map(this.$refs["map"], {
@@ -32,6 +39,7 @@ export default {
       center: new google.maps.LatLng(latitude, longitude),
       mapTypeId: google.maps.MapTypeId.ROADMAP,
     });
+    const directionsService = new google.maps.DirectionsService();
   },
 };
 </script>

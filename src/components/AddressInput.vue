@@ -55,9 +55,16 @@ export default {
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
+      console.log("place", place);
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
-      this["user/updatePosition"]({ refLabel: this.refLabel, lat, lng });
+      const placeId = place.place_id;
+      this["user/updatePosition"]({
+        refLabel: this.refLabel,
+        lat,
+        lng,
+        placeId,
+      });
     });
   },
 };
