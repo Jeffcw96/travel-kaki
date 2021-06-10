@@ -37,7 +37,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["user/findDistance"]),
+    ...mapActions(["user/findDistance","user/nearby"]),
     async calculateDistanceMatric() {
       if (!this.gotOrigin && this.gotDestination) return;
       const result = await this["user/findDistance"]();
@@ -70,25 +70,26 @@ export default {
 
             const allRoutes = response.routes[0].legs[0].steps;
             console.log(`response.routes[0]`, response.routes[0]);
-            let promises = [];
+            let locationsGeometry = [];
             let accumulatorDistance = 0;
-            for (let route of allRoutes) {
-              const distance = route.distance.value;
+            for (let i = 0; i < allRoutes.length; i++) {
+              const distance = allRoutes[i].distance.value;
               accumulatorDistance += distance;
-              if (accumulatorDistance >= RouteRadiusThreshold) {
-                const startLat = route.start_location.lat();
-                const startLng = route.start_location.lng();
-                const URL = `http://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${startLat},${startLng}&type=restaurant&radius=1000&key=${APIKey}`;
-                promises.push(axios.get(URL));
-                accumulatorDistance = 0;
+              if (accumulatorDistance >= RouteRadiusThreshold || i === allRoutes.length - 1){
+                  const startLat = allRoutes[i].start_location.lat();
+                  const startLng = allRoutes[i].start_location.lng();
+                  const location = {lat:startLat, lng:startLng}
+                  locationsGeometry.push(location)                                               
+                  accumulatorDistance = 0;
+                }
               }
-            }
 
-            const results = await Promise.all(promises);
+
+            const result = await this["user/nearby"]({locationsGeometry})
+            const shopsArr = result.data.shops
+
             const infoWindow = new google.maps.InfoWindow();
-            console.log("result", results);
-            for (let result of results) {
-              const shops = result.data.results;
+            for (let shops of shopsArr) {
               const processedShops = shops.filter((shop) => {
                 return shop.rating && shop.rating >= 4.0;
               });

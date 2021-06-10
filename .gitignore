@@ -13,3 +13,4 @@ plan.md
 *.ntvs*
 *.njsproj
 *.sln
+.env

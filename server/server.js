@@ -1,9 +1,13 @@
-const express = require('express')
-const cors = require('cors')
-const axios = require('axios')
-const app = express()
-app.use(express.json());
-app.use(cors())
+const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+const app = express();
+require('dotenv').config();
+app.use(express.json({ extended: false }));
+app.use(cors());
+app.use("/api", require("./routes/google"));
+
+
 app.post("/test", async (req, res) => {
     try {
         console.log("hello")
@@ -21,6 +25,7 @@ app.post("/test", async (req, res) => {
         res.status(500).send("SERVER ERROR")
     }
 })
+
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => { console.log(`Server is Running at PORT ${PORT}`) })
