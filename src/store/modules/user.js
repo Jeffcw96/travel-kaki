@@ -38,11 +38,7 @@ export default function user(http) {
 
     const actions = {
         async findDistance({ commit, state }) {
-            const URL = HerokuProxy + GoogleEndPoint + `/distancematrix/json?origins=place_id:${state.origin.placeId}&destinations=place_id:${state.destination.placeId}&key=${APIKey}`
-            // const jsonBody = { originPlaceId: state.origin.placeId, destinationPlaceId: state.destination.placeId }
-            // const result = await http.post("http://localhost:3000/test", jsonBody)
-            // console.log("result", result)
-            return http.get(URL)
+            return await http.get(`http://localhost:3000/api/finddistance?originPlaceId=${state.origin.placeId}&destinationPlaceId=${state.destination.placeId}`)
         },
 
         async nearby({ commit }, { locationsGeometry }) {
@@ -51,6 +47,10 @@ export default function user(http) {
             jsonObj.type = "restaurant"
             jsonObj.radius = 1000
             return await http.post('http://localhost:3000/api/nearby', jsonObj)
+        },
+
+        async placeDetails({ commit }, { placeId }) {
+            return await http.get(`http://localhost:3000/api/placedetail?placeId=${placeId}`)
         },
 
         async getGithubProfileDetail({ commit }, data) {

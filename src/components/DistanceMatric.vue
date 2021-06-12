@@ -37,23 +37,19 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["user/findDistance","user/nearby"]),
+    ...mapActions(["user/findDistance",
+                   "user/nearby",
+                   "user/placeDetails"]),
     async calculateDistanceMatric() {
       if (!this.gotOrigin && this.gotDestination) return;
-      const result = await this["user/findDistance"]();
-      console.log(result);
-      const originAddress = result.data.origin_addresses[0];
-      const destinationAddress = result.data.destination_addresses[0];
-
-      console.log(originAddress, destinationAddress);
-      console.log(document.getElementById("map"));
+      const response = await this["user/findDistance"]();
+      const result = response.data.result
+      const originAddress = result.origin_addresses[0];
+      const destinationAddress = result.destination_addresses[0];
 
       const { latitude, longitude } = await this.currentLatAndLong();
-      const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 15,
-        center: new google.maps.LatLng(latitude, longitude),
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-      });
+
+      const map = this.getGoogleMap(latitude,longitude)
       const directionsService = new google.maps.DirectionsService();
       const directionsRenderer = new google.maps.DirectionsRenderer();
       directionsService.route(
@@ -75,6 +71,17 @@ export default {
             for (let i = 0; i < allRoutes.length; i++) {
               const distance = allRoutes[i].distance.value;
               accumulatorDistance += distance;
+              if(distance >= 250000){
+                console.log(distance, allRoutes[i].path.length)
+                const pathDivider = Math.floor(distance / allRoutes[i].path.length)
+                const routesPathLocation = allRoutes[i].path.reduce((acc,cur,ind) =>{
+                  if(ind % pathDivider === 0){
+                    return [...acc, {lat:cur.lat(), lng: cur.lng()}]
+                  }
+                  return acc                                   
+                },[])
+                console.log("routesPathLocation",routesPathLocation)
+              }
               if (accumulatorDistance >= RouteRadiusThreshold || i === allRoutes.length - 1){
                   const startLat = allRoutes[i].start_location.lat();
                   const startLng = allRoutes[i].start_location.lng();
@@ -86,12 +93,13 @@ export default {
 
 
             const result = await this["user/nearby"]({locationsGeometry})
+            console.log('nearby result',result)
             const shopsArr = result.data.shops
 
             const infoWindow = new google.maps.InfoWindow();
             for (let shops of shopsArr) {
               const processedShops = shops.filter((shop) => {
-                return shop.rating && shop.rating >= 4.0;
+                return (shop.rating && shop.rating >= 4.0) && (shop.photos !== undefined);
               });
 
               for (let shop of processedShops) {
@@ -104,15 +112,16 @@ export default {
 
                 google.maps.event.addListener(marker, "click", async () => {
                   //place detail api
-                  let imageUrl = "";
-                  const URL = `http://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/details/json?key=${APIKey}&place_id=${placeId}`;
-                  const result = await axios.get(URL);
-                  const placeDetails = result.data.result;
+                  let imageUrl = "";                  
+                  const response = await this["user/placeDetails"]({placeId})
+                  
+                  const placeDetails = response.data.result;
+                  console.log("placeDetails", response);
                   if (placeDetails.photos) {
                     imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;
                   }
 
-                  console.log("placeDetails", placeDetails);
+                  
                   //info window allows to pop up a mini window when we click on the marker
                   //put your creative like review,rating, image HTML code here
                   infoWindow.setContent(
@@ -149,6 +158,16 @@ export default {
         );
       });
     },
+    getGoogleMap(latitude,longitude){
+      console.log("latitude,longitude",latitude,longitude)
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 15,
+        center: new google.maps.LatLng(latitude, longitude),
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+      });
+
+      return map
+    }
   },
 };
 </script>
