@@ -34,6 +34,7 @@ export default {
         "$store.state.user.places": {
             deep: true,
             handler(val) {
+                console.log('this.getQueryPlaces',this.getQueryPlaces)
                 this.places = this.getQueryPlaces;
             },
         },

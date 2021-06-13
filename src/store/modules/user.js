@@ -21,8 +21,7 @@ export default function user(http) {
             return { originAddress: state.originAddress, destinationAddress: state.destinationAddress }
         },
         getPlaces(state){
-            console.log("state place",state.places)
-            return state.places
+            return state.places.flat(Infinity)
         }
     }
 
