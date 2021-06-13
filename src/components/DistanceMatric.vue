@@ -23,6 +23,7 @@ export default {
       gotOrigin: false,
       gotDestination: false,
       markers:[],
+      allProcessedShops:[]
     };
   },
   watch: {
@@ -38,10 +39,11 @@ export default {
         this.gotDestination = true;
       },
     },
-    "$store.state.user.activeMarker": {
+    "$store.state.user.activeMarkerIndex": {
       deep: true,
-      handler(activeMarker) {
-         new google.maps.event.trigger(this.markers[activeMarker], "click");
+      handler(activeMarkerIndex) {
+         new google.maps.event.trigger(this.markers[activeMarkerIndex].marker, "click");
+
       },
     },
                
@@ -83,7 +85,6 @@ export default {
             for (let i = 0; i < allRoutes.length; i++) {
               const distance = allRoutes[i].distance.value;
               if(distance >= MarkUpRouteDistance){
-                console.log(distance, allRoutes[i].path.length)
                 const radius = allRoutes[i].path.length.toString()[0]
                 const pathDivider = Math.floor(distance / allRoutes[i].path.length)
                 const routesPathLocation = allRoutes[i].path.reduce((acc,cur,ind) =>{
@@ -114,15 +115,13 @@ export default {
       );
     },
     labelMarker(result,map){
-      this['user/setPlaces'](result.data.shops)
       const shopsArr = result.data.shops
       const infoWindow = new google.maps.InfoWindow();
-      this.markers = [];
-      for (let shops of shopsArr) {
+      for (let shops of shopsArr) {        
         const processedShops = shops.filter((shop) => {
           return (shop.rating && shop.rating >= 4.0) && (shop.photos !== undefined);
         });
-
+        this.allProcessedShops = [...this.allProcessedShops, processedShops]
         for (let shop of processedShops) {
           const placeId = shop.place_id;
           const { lat, lng } = shop.geometry.location;
@@ -131,10 +130,10 @@ export default {
             map: map,
           });
 
-          this.markers.push(marker)
-
           google.maps.event.addListener(marker, "click", async () => {
-            //place detail api
+            console.log("marker button clicked",marker, shop)
+            map.setZoom(15);
+            map.setCenter(marker.getPosition());
             let imageUrl = "";                  
             const response = await this["user/placeDetails"]({placeId})
             
@@ -152,9 +151,12 @@ export default {
             infoWindow.setContent(output);
             infoWindow.open(map, marker);
           });
+
+          this.markers.push({marker})
         }
       }
       this['user/setMarkers'](this.markers)
+      this['user/setPlaces'](this.allProcessedShops)
     },
     currentLatAndLong() {
       return new Promise((resolve, reject) => {

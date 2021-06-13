@@ -1,7 +1,7 @@
 <template>
     <div
-        style="max-height: 400px; overflow: scroll"
         v-show="places.length !== 0"
+        class="places-detail-container"
     >
         <div class="ui divided items">
         <div
@@ -14,7 +14,7 @@
         >
             <div class="content">
             <div class="header">{{ place.name }}</div>
-            <div class="meta">{{ place.vicinity }}</div>
+            <!-- <div class="meta">{{ place.vicinity }}</div> -->
             </div>
         </div>
         </div>
@@ -40,11 +40,11 @@ export default {
         },
     },
     methods:{
-        // ...mapMutations(['user/activeMarker']),
-        // showInfoWindow(index) {
-        //     this.activeIndex = index;
-        //     this['user/activeMarker'](index)
-        // },
+        ...mapMutations(['user/activeMarker']),
+        showInfoWindow(index) {
+            this.activeIndex = index;
+            this['user/activeMarker'](index)
+        },
     },
     computed:{
         ...mapGetters([
@@ -62,7 +62,14 @@ export default {
 </script>
 <style>
 .active{
-    background-color:red
+    background-color:red;
+}
+
+.places-detail-container{
+    max-height: 450px;
+    overflow-y: scroll;
+    background: white;
+    max-width: 300px;
 }
 
 </style>

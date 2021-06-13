@@ -26,8 +26,8 @@
         ]"
       />
       <DistanceMatric />
-      <PlacesDetail/>
     </div>
+    <PlacesDetail/>
   </div>
 </template>
 <script>

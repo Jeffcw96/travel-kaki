@@ -1,11 +1,11 @@
 import Vue from 'vue'
-import { HerokuProxy, GoogleEndPoint, APIKey } from '@/enum/common'
 export default function user(http) {
     const state = {
         origin: {},
         destination: {},
-        places:[],
-        markers:[],
+        places: [],
+        markers: [],
+        activeMarkerIndex: null,
         originAddress: "",
         destinationAddress: "",
     }
@@ -20,7 +20,7 @@ export default function user(http) {
         getAddresses(state) {
             return { originAddress: state.originAddress, destinationAddress: state.destinationAddress }
         },
-        getPlaces(state){
+        getPlaces(state) {
             return state.places.flat(Infinity)
         }
     }
@@ -39,12 +39,18 @@ export default function user(http) {
             state.profile = data
         },
 
-        setPlaces(state,place){
+        setPlaces(state, place) {
+            console.log('setPlaces', place)
             state.places.push(place)
         },
 
-        setMarkers(state,markers){
+        setMarkers(state, markers) {
+            console.log("set markers", markers)
             state.markers = markers
+        },
+
+        activeMarker(state, activeIndex) {
+            state.activeMarkerIndex = activeIndex
         }
     }
 
