@@ -1,6 +1,6 @@
 <template>
   <div class="user-ui-container">
-    <div class="d-flex">
+    <div class="d-flex align-items-center">
       <AddressInput
         :refLabel="'origin'"
         placeholderLabel="From"
@@ -26,17 +26,20 @@
         ]"
       />
       <DistanceMatric />
+      <PlacesDetail/>
     </div>
   </div>
 </template>
 <script>
 import DistanceMatric from "@/components/DistanceMatric";
+import PlacesDetail from "@/components/PlacesDetail"
 import AddressInput from "@/components/AddressInput";
 export default {
   name: "UserUI",
   components: {
     AddressInput,
     DistanceMatric,
+    PlacesDetail
   },
 };
 </script>

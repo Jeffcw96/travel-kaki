@@ -4,6 +4,8 @@ export default function user(http) {
     const state = {
         origin: {},
         destination: {},
+        places:[],
+        markers:[],
         originAddress: "",
         destinationAddress: "",
     }
@@ -17,8 +19,11 @@ export default function user(http) {
         },
         getAddresses(state) {
             return { originAddress: state.originAddress, destinationAddress: state.destinationAddress }
+        },
+        getPlaces(state){
+            console.log("state place",state.places)
+            return state.places
         }
-
     }
 
     const mutations = {
@@ -33,6 +38,14 @@ export default function user(http) {
         },
         setProfile(state, data) {
             state.profile = data
+        },
+
+        setPlaces(state,place){
+            state.places.push(place)
+        },
+
+        setMarkers(state,markers){
+            state.markers = markers
         }
     }
 
@@ -41,11 +54,11 @@ export default function user(http) {
             return await http.get(`http://localhost:3000/api/finddistance?originPlaceId=${state.origin.placeId}&destinationPlaceId=${state.destination.placeId}`)
         },
 
-        async nearby({ commit }, { locationsGeometry }) {
+        async nearby({ commit }, { locationsGeometry, radius: radius = 1000 }) {
             const jsonObj = {}
             jsonObj.locationsGeometry = locationsGeometry
             jsonObj.type = "restaurant"
-            jsonObj.radius = 1000
+            jsonObj.radius = radius
             return await http.post('http://localhost:3000/api/nearby', jsonObj)
         },
 
@@ -56,7 +69,8 @@ export default function user(http) {
         async getGithubProfileDetail({ commit }, data) {
             const profileDetails = await http.get('https://api.github.com/users/jeffcw96');
             commit("setProfile", profileDetails.data)
-        }
+        },
+
     }
 
     return {

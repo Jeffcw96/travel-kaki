@@ -1,6 +1,7 @@
 <template>
   <div>
     <button
+      class="button"
       @click.prevent="calculateDistanceMatric"
       :style="
         !gotOrigin && !gotDestination ? 'cursor:not-allowed' : 'cursor:pointer'
@@ -12,14 +13,16 @@
 </template>
 <script>
 import axios from "axios";
-import { APIKey, RouteRadiusThreshold } from "@/enum/common";
-import { mapGetters, mapActions } from "vuex";
+import { APIKey, RouteRadiusThreshold, MarkUpRouteDistance } from "@/enum/common";
+import placeHTML from '@/enum/content'
+import { mapGetters, mapActions, mapMutations } from "vuex";
 export default {
   name: "DistanceMatric",
   data() {
     return {
       gotOrigin: false,
       gotDestination: false,
+      markers:[],
     };
   },
   watch: {
@@ -35,13 +38,22 @@ export default {
         this.gotDestination = true;
       },
     },
+    "$store.state.user.activeMarker": {
+      deep: true,
+      handler(activeMarker) {
+         new google.maps.event.trigger(this.markers[activeMarker], "click");
+      },
+    },
+               
   },
   methods: {
+    ...mapMutations(['user/setMarkers',
+                    'user/setPlaces']),
     ...mapActions(["user/findDistance",
                    "user/nearby",
                    "user/placeDetails"]),
     async calculateDistanceMatric() {
-      if (!this.gotOrigin && this.gotDestination) return;
+      if (!this.inputIsValid) return;
       const response = await this["user/findDistance"]();
       const result = response.data.result
       const originAddress = result.origin_addresses[0];
@@ -65,14 +77,14 @@ export default {
             directionsRenderer.setMap(map);
 
             const allRoutes = response.routes[0].legs[0].steps;
-            console.log(`response.routes[0]`, response.routes[0]);
+
             let locationsGeometry = [];
             let accumulatorDistance = 0;
             for (let i = 0; i < allRoutes.length; i++) {
               const distance = allRoutes[i].distance.value;
-              accumulatorDistance += distance;
-              if(distance >= 250000){
+              if(distance >= MarkUpRouteDistance){
                 console.log(distance, allRoutes[i].path.length)
+                const radius = allRoutes[i].path.length.toString()[0]
                 const pathDivider = Math.floor(distance / allRoutes[i].path.length)
                 const routesPathLocation = allRoutes[i].path.reduce((acc,cur,ind) =>{
                   if(ind % pathDivider === 0){
@@ -80,8 +92,13 @@ export default {
                   }
                   return acc                                   
                 },[])
-                console.log("routesPathLocation",routesPathLocation)
+                const result = await this["user/nearby"]({locationsGeometry:routesPathLocation, radius:radius*1000})
+                this.labelMarker(result,map)
+                continue
               }
+
+              accumulatorDistance += distance;
+             
               if (accumulatorDistance >= RouteRadiusThreshold || i === allRoutes.length - 1){
                   const startLat = allRoutes[i].start_location.lat();
                   const startLng = allRoutes[i].start_location.lng();
@@ -90,54 +107,54 @@ export default {
                   accumulatorDistance = 0;
                 }
               }
-
-
-            const result = await this["user/nearby"]({locationsGeometry})
-            console.log('nearby result',result)
-            const shopsArr = result.data.shops
-
-            const infoWindow = new google.maps.InfoWindow();
-            for (let shops of shopsArr) {
-              const processedShops = shops.filter((shop) => {
-                return (shop.rating && shop.rating >= 4.0) && (shop.photos !== undefined);
-              });
-
-              for (let shop of processedShops) {
-                const placeId = shop.place_id;
-                const { lat, lng } = shop.geometry.location;
-                const marker = new google.maps.Marker({
-                  position: new google.maps.LatLng(lat, lng),
-                  map: map,
-                });
-
-                google.maps.event.addListener(marker, "click", async () => {
-                  //place detail api
-                  let imageUrl = "";                  
-                  const response = await this["user/placeDetails"]({placeId})
-                  
-                  const placeDetails = response.data.result;
-                  console.log("placeDetails", response);
-                  if (placeDetails.photos) {
-                    imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;
-                  }
-
-                  
-                  //info window allows to pop up a mini window when we click on the marker
-                  //put your creative like review,rating, image HTML code here
-                  infoWindow.setContent(
-                    `<div class="ui header">${placeDetails.name}</div>
-                    ${placeDetails.formatted_address}
-                    ${placeDetails.formatted_phone_number}
-                    ${placeDetails.rating}
-                    <div style="max-width:400px"><img src="${imageUrl}" style="width:100%"/></div>`
-                  );
-                  infoWindow.open(map, marker);
-                });
-              }
-            }
+              const result = await this["user/nearby"]({locationsGeometry})
+              this.labelMarker(result,map)
           }
         }
       );
+    },
+    labelMarker(result,map){
+      this['user/setPlaces'](result.data.shops)
+      const shopsArr = result.data.shops
+      const infoWindow = new google.maps.InfoWindow();
+      this.markers = [];
+      for (let shops of shopsArr) {
+        const processedShops = shops.filter((shop) => {
+          return (shop.rating && shop.rating >= 4.0) && (shop.photos !== undefined);
+        });
+
+        for (let shop of processedShops) {
+          const placeId = shop.place_id;
+          const { lat, lng } = shop.geometry.location;
+          const marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, lng),
+            map: map,
+          });
+
+          this.markers.push(marker)
+
+          google.maps.event.addListener(marker, "click", async () => {
+            //place detail api
+            let imageUrl = "";                  
+            const response = await this["user/placeDetails"]({placeId})
+            
+            const placeDetails = response.data.result;
+            console.log("placeDetails", response);
+            if (placeDetails.photos) {
+              imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;
+            }
+            let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)
+            output = output.replace(/{%placeRating%}/g,placeDetails.rating)
+            output = output.replace(/{%placeRouting%}/g,placeDetails.url)
+            output = output.replace(/{%placeImage%}/g,imageUrl)
+
+
+            infoWindow.setContent(output);
+            infoWindow.open(map, marker);
+          });
+        }
+      }
+      this['user/setMarkers'](this.markers)
     },
     currentLatAndLong() {
       return new Promise((resolve, reject) => {
@@ -159,7 +176,6 @@ export default {
       });
     },
     getGoogleMap(latitude,longitude){
-      console.log("latitude,longitude",latitude,longitude)
       const map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
         center: new google.maps.LatLng(latitude, longitude),
@@ -169,5 +185,19 @@ export default {
       return map
     }
   },
+  computed:{
+    inputIsValid(){
+      return  this.gotOrigin && this.gotDestination
+    }
+  }
 };
 </script>
+<style>
+.button{
+    padding: 5px 15px;
+    border: 1px solid gray;
+    border-radius: 5px;
+}
+
+
+</style>

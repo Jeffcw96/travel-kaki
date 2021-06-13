@@ -7,7 +7,7 @@ router.post("/nearby", async (req, res) => {
         const { locationsGeometry, type, radius } = req.body
         const promises = []
         for (let geometry of locationsGeometry) {
-            const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${geometry.lat},${geometry.lng}&type=${type}&radius=${radius}&key=${process.env.APIKey}`;
+            const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${geometry.lat},${geometry.lng}&type=${type}&radius=${radius}&key=${process.env.APIKey}&opennow&rankby=prominence`;
             promises.push(axios.get(URL))
         }
 
