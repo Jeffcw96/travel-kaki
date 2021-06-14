@@ -23,6 +23,7 @@ export default {
       gotOrigin: false,
       gotDestination: false,
       markers:[],
+      markerIndex:0,
       allProcessedShops:[]
     };
   },
@@ -42,7 +43,7 @@ export default {
     "$store.state.user.activeMarkerIndex": {
       deep: true,
       handler(activeMarkerIndex) {
-         new google.maps.event.trigger(this.markers[activeMarkerIndex].marker, "click");
+         new google.maps.event.trigger(this.markers[activeMarkerIndex], "click");
 
       },
     },
@@ -50,7 +51,8 @@ export default {
   },
   methods: {
     ...mapMutations(['user/setMarkers',
-                    'user/setPlaces']),
+                    'user/setPlaces',
+                    'user/activeMarker']),
     ...mapActions(["user/findDistance",
                    "user/nearby",
                    "user/placeDetails"]),
@@ -123,6 +125,7 @@ export default {
         });
         this.allProcessedShops = [...this.allProcessedShops, processedShops]
         for (let shop of processedShops) {
+          const currentMarkerIndex = this.markerIndex
           const placeId = shop.place_id;
           const { lat, lng } = shop.geometry.location;
           const marker = new google.maps.Marker({
@@ -131,28 +134,29 @@ export default {
           });
 
           google.maps.event.addListener(marker, "click", async () => {
-            console.log("marker button clicked",marker, shop)
+            console.log("marker button clicked",marker, shop,currentMarkerIndex)
+            this['user/activeMarker'](currentMarkerIndex)
             map.setZoom(15);
-            map.setCenter(marker.getPosition());
-            let imageUrl = "";                  
+            map.setCenter(marker.getPosition());            
             const response = await this["user/placeDetails"]({placeId})
             
             const placeDetails = response.data.result;
+            let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
             console.log("placeDetails", response);
-            if (placeDetails.photos) {
-              imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;
-            }
+      
+            const base64ImageUrl = await axios.post('http://localhost:3000/api/placeImage',{imageUrl})            
+            console.log('base64ImageUrl',base64ImageUrl)
             let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)
             output = output.replace(/{%placeRating%}/g,placeDetails.rating)
             output = output.replace(/{%placeRouting%}/g,placeDetails.url)
-            output = output.replace(/{%placeImage%}/g,imageUrl)
-
-
+            output = output.replace(/{%placeImage%}/g, base64ImageUrl.data.url)
             infoWindow.setContent(output);
             infoWindow.open(map, marker);
-          });
 
-          this.markers.push({marker})
+
+          });
+          this.markerIndex++
+          this.markers.push(marker)
         }
       }
       this['user/setMarkers'](this.markers)

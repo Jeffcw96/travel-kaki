@@ -17,6 +17,7 @@
             <!-- <div class="meta">{{ place.vicinity }}</div> -->
             </div>
         </div>
+                <pre>{{activeIndex}}</pre>
         </div>
     </div>
 </template>
@@ -36,6 +37,13 @@ export default {
             handler(val) {
                 console.log('this.getQueryPlaces',this.getQueryPlaces)
                 this.places = this.getQueryPlaces;
+            },
+        },
+        "$store.state.user.activeMarkerIndex": {
+        deep: true,
+            handler(activeMarkerIndex) {      
+                console.log("active marker in side nav",activeMarkerIndex)         
+                this.activeIndex = activeMarkerIndex
             },
         },
     },

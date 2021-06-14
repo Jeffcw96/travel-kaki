@@ -50,6 +50,7 @@ export default function user(http) {
         },
 
         activeMarker(state, activeIndex) {
+            console.log('activeMarker', activeIndex)
             state.activeMarkerIndex = activeIndex
         }
     }

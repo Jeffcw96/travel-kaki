@@ -59,4 +59,19 @@ router.get('/finddistance', async (req, res) => {
     }
 })
 
+router.post('/placeImage', async (req, res) => {
+    try {
+        console.log("place image api")
+        const { imageUrl } = req.body
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        let base64Image = Buffer.from(response.data, 'binary').toString('base64')
+        res.json({ url: `data:${response.headers['content-type'].toLowerCase()};base64,${base64Image}` })
+
+    } catch (error) {
+        console.error(error.message)
+
+        res.status(500).send('SERVER ERROR')
+    }
+})
+
 module.exports = router
