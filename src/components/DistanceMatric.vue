@@ -55,7 +55,8 @@ export default {
                     'user/activeMarker']),
     ...mapActions(["user/findDistance",
                    "user/nearby",
-                   "user/placeDetails"]),
+                   "user/placeDetails",
+                   'user/getPlaceImage']),
     async calculateDistanceMatric() {
       if (!this.inputIsValid) return;
       const response = await this["user/findDistance"]();
@@ -144,7 +145,8 @@ export default {
             let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
             console.log("placeDetails", response);
       
-            const base64ImageUrl = await axios.post('http://localhost:3000/api/placeImage',{imageUrl})            
+
+            const base64ImageUrl = await this['user/getPlaceImage'](imageUrl)            
             console.log('base64ImageUrl',base64ImageUrl)
             let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)
             output = output.replace(/{%placeRating%}/g,placeDetails.rating)

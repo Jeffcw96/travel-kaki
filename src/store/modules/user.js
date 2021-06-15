@@ -72,10 +72,9 @@ export default function user(http) {
             return await http.get(`http://localhost:3000/api/placedetail?placeId=${placeId}`)
         },
 
-        async getGithubProfileDetail({ commit }, data) {
-            const profileDetails = await http.get('https://api.github.com/users/jeffcw96');
-            commit("setProfile", profileDetails.data)
-        },
+        async getPlaceImage({ commit }, imageUrl) {
+            return await http.post('http://localhost:3000/api/placeImage', { imageUrl })
+        }
 
     }
 

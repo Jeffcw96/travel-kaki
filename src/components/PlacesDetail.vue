@@ -10,14 +10,13 @@
             :key="ind"
             @click="showInfoWindow(ind)"
             :class="{ active: ind === activeIndex }"
-            style="cursor: pointer"
+            style="cursor: pointer; padding:10px"
         >
             <div class="content">
-            <div class="header">{{ place.name }}</div>
-            <!-- <div class="meta">{{ place.vicinity }}</div> -->
+                <div class="header">{{ place.name }}</div>
+                <div class="meta">{{ place.vicinity }}</div>
             </div>
         </div>
-                <pre>{{activeIndex}}</pre>
         </div>
     </div>
 </template>
@@ -70,14 +69,40 @@ export default {
 </script>
 <style>
 .active{
-    background-color:red;
+    background-color:rgb(235, 22, 22);
+}
+
+.item{
+    transition: all .3s;
+    border-bottom: 1px solid rgb(73, 73, 73);;
+}
+
+.item:hover{
+    background-color:rgb(255, 71, 71);
+}
+
+.item:hover .header, .item.active .header{
+    font-weight: bold;
+}
+
+.item:hover .meta, .item.active .meta{
+    color: white;
+}
+
+.item:last-child{
+    border:none
+}
+
+.meta{
+    font-size: 0.8rem;
+    margin-top: 5px;
+    color: rgb(112, 112, 112);
 }
 
 .places-detail-container{
     max-height: 450px;
     overflow-y: scroll;
-    background: white;
-    max-width: 300px;
+    background: #f6f6f6
 }
 
 </style>
