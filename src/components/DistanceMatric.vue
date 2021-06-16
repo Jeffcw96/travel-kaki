@@ -24,6 +24,7 @@ export default {
       gotDestination: false,
       markers:[],
       markerIndex:0,
+      shopIndex:0,
       allProcessedShops:[]
     };
   },
@@ -80,7 +81,6 @@ export default {
             console.log(response);
             directionsRenderer.setDirections(response);
             directionsRenderer.setMap(map);
-
             const allRoutes = response.routes[0].legs[0].steps;
 
             let locationsGeometry = [];
@@ -96,7 +96,7 @@ export default {
                   }
                   return acc                                   
                 },[])
-                const result = await this["user/nearby"]({locationsGeometry:routesPathLocation, radius:radius*1000})
+                const result = await this["user/nearby"]({locationsGeometry:routesPathLocation, radius:(radius+2)*1000})
                 this.labelMarker(result,map)
                 continue
               }
@@ -124,42 +124,42 @@ export default {
         const processedShops = shops.filter((shop) => {
           return (shop.rating && shop.rating >= 4.0) && (shop.photos !== undefined);
         });
-        this.allProcessedShops = [...this.allProcessedShops, processedShops]
-        for (let shop of processedShops) {
-          const currentMarkerIndex = this.markerIndex
-          const placeId = shop.place_id;
-          const { lat, lng } = shop.geometry.location;
-          const marker = new google.maps.Marker({
-            position: new google.maps.LatLng(lat, lng),
-            map: map,
-          });
+        this.allProcessedShops = [...this.allProcessedShops,...processedShops]
+      }
+      for (let shop of this.allProcessedShops) {
+        const currentMarkerIndex = this.markerIndex
+        const placeId = shop.place_id;
+        const { lat, lng } = shop.geometry.location;
+        const marker = new google.maps.Marker({
+          position: new google.maps.LatLng(lat, lng),
+          map: map,
+        });
 
-          google.maps.event.addListener(marker, "click", async () => {
-            console.log("marker button clicked",marker, shop,currentMarkerIndex)
-            this['user/activeMarker'](currentMarkerIndex)
-            map.setZoom(15);
-            map.setCenter(marker.getPosition());            
-            const response = await this["user/placeDetails"]({placeId})
-            
-            const placeDetails = response.data.result;
-            let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
-            console.log("placeDetails", response);
-      
+        google.maps.event.addListener(marker, "click", async () => {
+          console.log("marker button clicked",marker, shop,currentMarkerIndex)
+          this['user/activeMarker'](currentMarkerIndex)
+          map.setZoom(15);
+          map.setCenter(marker.getPosition());            
+          const response = await this["user/placeDetails"]({placeId})
+          
+          const placeDetails = response.data.result;
+          let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
+          console.log("placeDetails", response);
+    
 
-            const base64ImageUrl = await this['user/getPlaceImage'](imageUrl)            
-            console.log('base64ImageUrl',base64ImageUrl)
-            let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)
-            output = output.replace(/{%placeRating%}/g,placeDetails.rating)
-            output = output.replace(/{%placeRouting%}/g,placeDetails.url)
-            output = output.replace(/{%placeImage%}/g, base64ImageUrl.data.url)
-            infoWindow.setContent(output);
-            infoWindow.open(map, marker);
+          const base64ImageUrl = await this['user/getPlaceImage'](imageUrl)            
+          console.log('base64ImageUrl',base64ImageUrl)
+          let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)
+          output = output.replace(/{%placeRating%}/g,placeDetails.rating)
+          output = output.replace(/{%placeRouting%}/g,placeDetails.url)
+          output = output.replace(/{%placeImage%}/g, base64ImageUrl.data.url)
+          infoWindow.setContent(output);
+          infoWindow.open(map, marker);
 
 
-          });
-          this.markerIndex++
-          this.markers.push(marker)
-        }
+        });
+        this.markerIndex++
+        this.markers.push(marker)
       }
       this['user/setMarkers'](this.markers)
       this['user/setPlaces'](this.allProcessedShops)

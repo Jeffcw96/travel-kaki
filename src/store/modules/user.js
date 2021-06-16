@@ -12,16 +12,19 @@ export default function user(http) {
 
     const getters = {
         getOriginPos(state) {
-            return state.position.origin
+            return state.origin
         },
         getDestinationPos(state) {
-            return state.position.destination
+            return state.destination
         },
         getAddresses(state) {
             return { originAddress: state.originAddress, destinationAddress: state.destinationAddress }
         },
         getPlaces(state) {
             return state.places.flat(Infinity)
+        },
+        getMarkers(state) {
+            return state.markers.flat(Infinity)
         }
     }
 
@@ -46,7 +49,7 @@ export default function user(http) {
 
         setMarkers(state, markers) {
             console.log("set markers", markers)
-            state.markers = markers
+            state.markers.push(markers)
         },
 
         activeMarker(state, activeIndex) {
