@@ -4,100 +4,78 @@ module.exports = {
     HerokuProxy: 'https://cors-anywhere.herokuapp.com/',
     RouteRadiusThreshold: 1500, //this stands for Meter,
     MarkUpRouteDistance: 5000,
-    PlaceTypes: ['accounting',
-        'airport',
-        'amusement_park',
-        'aquarium',
-        'art_gallery',
-        'atm',
-        'bakery',
-        'bank',
-        'bar',
-        'beauty_salon',
-        'bicycle_store',
-        'book_store',
-        'bowling_alley',
-        'bus_station',
-        'cafe',
-        'campground',
-        'car_dealer',
-        'car_rental',
-        'car_repair',
-        'car_wash',
-        'casino',
-        'cemetery',
-        'church',
-        'city_hall',
-        'clothing_store',
-        'convenience_store',
-        'courthouse',
-        'dentist',
-        'department_store',
-        'doctor',
-        'drugstore',
-        'electrician',
-        'electronics_store',
-        'embassy',
-        'fire_station',
-        'florist',
-        'funeral_home',
-        'furniture_store',
-        'gas_station',
-        'gym',
-        'hair_care',
-        'hardware_store',
-        'hindu_temple',
-        'home_goods_store',
-        'hospital',
-        'insurance_agency',
-        'jewelry_store',
-        'laundry',
-        'lawyer',
-        'library',
-        'light_rail_station',
-        'liquor_store',
-        'local_government_office',
-        'locksmith',
-        'lodging',
-        'meal_delivery',
-        'meal_takeaway',
-        'mosque',
-        'movie_rental',
-        'movie_theater',
-        'moving_company',
-        'museum',
-        'night_club',
-        'painter',
-        'park',
-        'parking',
-        'pet_store',
-        'pharmacy',
-        'physiotherapist',
-        'plumber',
-        'police',
-        'post_office',
-        'primary_school',
-        'real_estate_agency',
-        'restaurant',
-        'roofing_contractor',
-        'rv_park',
-        'school',
-        'secondary_school',
-        'shoe_store',
-        'shopping_mall',
-        'spa',
-        'stadium',
-        'storage',
-        'store',
-        'subway_station',
-        'supermarket',
-        'synagogue',
-        'taxi_stand',
-        'tourist_attraction',
-        'train_station',
-        'transit_station',
-        'travel_agency',
-        'university',
-        'veterinary_care',
-        'zoo'],
+    PlaceTypes: [
+        {
+            label: "Amusement Park",
+            value: "amusement_park"
+        },
+        {
+            label: "Aquarium",
+            value: "aquarium"
+        },
+        {
+            label: "Art Gallery",
+            value: "art_gallery"
+        },
+        {
+            label: "Bakery",
+            value: "bakery"
+        },
+        {
+            label: "Bar",
+            value: "bar"
+        },
+        {
+            label: "Bowling Alley",
+            value: "bowling_alley"
+        },
+        {
+            label: "Cafe",
+            value: "cafe"
+        },
+        {
+            label: "Car Repair",
+            value: "car_repair"
+        },
+        {
+            label: "Clothing Store",
+            value: "clothing_store"
+        },
+        {
+            label: "Hospital",
+            value: "hospital"
+        },
+        {
+            label: "Delivery Restaurant",
+            value: "meal_delivery"
+        },
+        {
+            label: "Night Club",
+            value: "night_club"
+        },
+        {
+            label: "Park",
+            value: "park"
+        },
+        {
+            label: "Restaurant",
+            value: "restaurant"
+        },
+        {
+            label: "Shopping Mall",
+            value: "shopping_mall"
+        },
+        {
+            label: "Supermarket",
+            value: "supermarket"
+        },
+        {
+            label: "Tourist Attraction",
+            value: "tourist_attraction"
+        },
+        {
+            label: "Zoo",
+            value: "zoo"
+        },
+    ],
 }

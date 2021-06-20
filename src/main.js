@@ -6,7 +6,6 @@ import store from './store'
 import router from './router'
 import './assets/style.css';
 import axios from 'axios'
-import StarRating from 'vue-star-rating'
 Vue.config.productionTip = false
 let vuexStore = store(axios);
 /* eslint-disable no-new */

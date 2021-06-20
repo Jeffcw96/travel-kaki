@@ -24,7 +24,22 @@
 
 .border-standard{
     border: 1px solid rgb(65, 64, 64);
-    border-radius: 5px;
+}
+
+.border-top-0{
+    border-top: none;
+}
+
+.border-left-0{
+    border-left: none;
+}
+
+.border-right-0{
+    border-right: none;
+}
+
+.border-bottom-0{
+    border-bottom: none;
 }
 
 .h-100{
@@ -35,6 +50,22 @@
     display: flex;
 }
 
+.d-block{
+    display: block;
+}
+
 .align-items-center{
     align-items:center
+}
+
+input{
+    outline: none;
+}
+
+.text-left{
+    text-align: left;
+}
+
+.font-white{
+    color: white;
 }

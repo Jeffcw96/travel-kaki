@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div :class="parentClasses">
+    <label>{{label}}</label>
     <input
       type="text"
       :placeholder="placeholderLabel"
@@ -22,10 +23,18 @@ export default {
       type: Array,
       default: [],
     },
+    parentClass: {
+      type: Array,
+      default: [],
+    },
     refLabel: {
       type: String,
       default: "",
     },
+    label:{
+      type:String,
+      default: "",
+    }
   },
   data() {
     return {
@@ -33,8 +42,7 @@ export default {
       addressLng: null,
     };
   },
-  methods: {
-    ...mapMutations(["user/updatePosition"]),
+  methods: {    
     handleInput({ target }) {},
     handleAddressInput() {
       console.log("autocomplete", this.autocomplete.getPlace());
@@ -44,6 +52,9 @@ export default {
     classes() {
       return this.cssClass.join(" ");
     },
+    parentClasses(){
+      return this.parentClass.join(" ");
+    }
   },
   mounted() {
     const autocomplete = new google.maps.places.Autocomplete(
@@ -59,13 +70,13 @@ export default {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
       const placeId = place.place_id;
-      this["user/updatePosition"]({
-        refLabel: this.refLabel,
-        lat,
-        lng,
-        placeId,
-      });
+      this.$emit('update-value',{lat,lng,placeId})
     });
   },
 };
 </script>
+<style scoped>
+::placeholder {
+  font-style:italic;
+}
+</style>

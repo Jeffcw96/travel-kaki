@@ -1,10 +1,12 @@
 <template>
   <div>
     <UserUI />
-    <GoogleMap />
+    <!-- <GoogleMap /> -->
+    <MultiLocation />
   </div>
 </template>
 <script>
+import MultiLocation from "@/view/UserUI"
 import GoogleMap from "@/components/GoogleMap";
 import UserUI from "@/view/UserUI";
 export default {
@@ -12,6 +14,7 @@ export default {
   components: {
     UserUI,
     GoogleMap,
+    MultiLocation
   },
 };
 </script>
