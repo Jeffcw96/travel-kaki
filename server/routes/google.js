@@ -13,11 +13,15 @@ router.post("/nearby", async (req, res) => {
 
         const results = await Promise.all(promises)
         const shopsArr = []
+        const moreShops = []
         for (let result of results) {
+            if (result.data.next_page_token) {
+                moreShops.push(result.data.next_page_token)
+            }
             shopsArr.push(result.data.results)
         }
 
-        res.json({ shops: shopsArr })
+        res.json({ shops: shopsArr, moreShops: moreShops })
 
     } catch (error) {
         console.error(error.message)

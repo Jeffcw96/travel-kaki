@@ -9,10 +9,10 @@
     >
       Search
     </button>
+    <small class="advance-search">Advanced Search</small>
   </div>
 </template>
 <script>
-import axios from "axios";
 import { APIKey, RouteRadiusThreshold, MarkUpRouteDistance } from "@/enum/common";
 import placeHTML from '@/enum/content'
 import { mapGetters, mapActions, mapMutations } from "vuex";
@@ -81,48 +81,49 @@ export default {
             console.log(response);
             directionsRenderer.setDirections(response);
             directionsRenderer.setMap(map);
-            const allRoutes = response.routes[0].legs[0].steps;
-
-            let locationsGeometry = [];
-            let accumulatorDistance = 0;
-            for (let i = 0; i < allRoutes.length; i++) {
-              const distance = allRoutes[i].distance.value;
-              if(distance >= MarkUpRouteDistance){
-                const radius = allRoutes[i].path.length.toString()[0]
-                const pathDivider = Math.floor(distance / allRoutes[i].path.length)
-                const routesPathLocation = allRoutes[i].path.reduce((acc,cur,ind) =>{
-                  if(ind % pathDivider === 0){
-                    return [...acc, {lat:cur.lat(), lng: cur.lng()}]
-                  }
-                  return acc                                   
-                },[])
-                const result = await this["user/nearby"]({locationsGeometry:routesPathLocation, radius:(radius+2)*1000})
-                this.labelMarker(result,map)
-                continue
-              }
-
-              accumulatorDistance += distance;
-             
-              if (accumulatorDistance >= RouteRadiusThreshold || i === allRoutes.length - 1){
-                  const startLat = allRoutes[i].start_location.lat();
-                  const startLng = allRoutes[i].start_location.lng();
-                  const location = {lat:startLat, lng:startLng}
-                  locationsGeometry.push(location)                                               
-                  accumulatorDistance = 0;
-                }
-              }
-              const result = await this["user/nearby"]({locationsGeometry})
-              this.labelMarker(result,map)
+            this.nearBySearch(response.routes[0].legs[0].steps,map)
           }
         }
       );
+    },
+    async nearBySearch(allRoutes,map){
+      let locationsGeometry = [];
+      let accumulatorDistance = 0;
+      for (let i = 0; i < allRoutes.length; i++) {
+        const distance = allRoutes[i].distance.value;
+        if(distance >= MarkUpRouteDistance){
+          const radius = allRoutes[i].path.length.toString()[0]
+          const pathDivider = Math.floor(distance / allRoutes[i].path.length)
+          const routesPathLocation = allRoutes[i].path.reduce((acc,cur,ind) =>{
+            if(ind % pathDivider === 0){
+              return [...acc, {lat:cur.lat(), lng: cur.lng()}]
+            }
+            return acc                                   
+          },[])
+          const result = await this["user/nearby"]({locationsGeometry:routesPathLocation, radius:radius*1000})
+          this.labelMarker(result,map)
+          continue
+        }
+
+        accumulatorDistance += distance;
+        
+        if (accumulatorDistance >= RouteRadiusThreshold || i === allRoutes.length - 1){
+            const startLat = allRoutes[i].start_location.lat();
+            const startLng = allRoutes[i].start_location.lng();
+            const location = {lat:startLat, lng:startLng}
+            locationsGeometry.push(location)                                               
+            accumulatorDistance = 0;
+          }
+        }
+        const result = await this["user/nearby"]({locationsGeometry})
+        this.labelMarker(result,map)
     },
     labelMarker(result,map){
       const shopsArr = result.data.shops
       const infoWindow = new google.maps.InfoWindow();
       for (let shops of shopsArr) {        
         const processedShops = shops.filter((shop) => {
-          return (shop.rating && shop.rating >= 4.0) && (shop.photos !== undefined);
+          return (shop.rating && shop.rating >= 3.0) && (shop.photos !== undefined);
         });
         this.allProcessedShops = [...this.allProcessedShops,...processedShops]
       }
@@ -145,12 +146,13 @@ export default {
           const placeDetails = response.data.result;
           let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
           console.log("placeDetails", response);
-    
 
+          const formattedRating = this.roundDownNearest(placeDetails.rating,0.5)
+          console.log("formattedRating",typeof(placeDetails.rating), formattedRating)
           const base64ImageUrl = await this['user/getPlaceImage'](imageUrl)            
-          console.log('base64ImageUrl',base64ImageUrl)
-          let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)
-          output = output.replace(/{%placeRating%}/g,placeDetails.rating)
+
+          let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)          
+          output = output.replace(`{%${formattedRating}%}`,'checked')
           output = output.replace(/{%placeRouting%}/g,placeDetails.url)
           output = output.replace(/{%placeImage%}/g, base64ImageUrl.data.url)
           infoWindow.setContent(output);
@@ -189,8 +191,15 @@ export default {
         center: new google.maps.LatLng(latitude, longitude),
         mapTypeId: google.maps.MapTypeId.ROADMAP,
       });
-
       return map
+    },
+    roundDownNearest(rating,interval){
+      const floor = parseFloat(Math.floor(rating))
+      console.log("floor",floor,rating)
+      if(rating - floor < interval){
+        return floor
+      }
+      return floor+interval
     }
   },
   computed:{
@@ -201,11 +210,58 @@ export default {
 };
 </script>
 <style>
-.button{
-    padding: 5px 15px;
-    border: 1px solid gray;
-    border-radius: 5px;
+@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+/* Ratings widget */
+.rate {
+    display: inline-block;
+    border: 0;
+}
+/* Hide radio */
+.rate > input {
+    display: none;
+}
+/* Order correctly by floating highest to the right */
+.rate > label {
+    float: right;
+}
+/* The star of the show */
+.rate > label:before {
+    display: inline-block;
+    font-size: 2rem;
+    padding: .3rem .2rem;
+    margin: 0;
+    cursor: pointer;
+    font-family: FontAwesome;
+    content: "\f005 "; /* full star */
 }
 
+/* Half star trick */
+.rate .half:before {
+    content: "\f089 "; /* half star no outline */
+    position: absolute;
+    padding-right: 0;
+}
+/* Click + hover color */
+input:checked ~ label { color: #eaf903;  } /* color previous stars on hover */
+
+/* Hover highlights */
+input:checked , 
+input:checked ~ label
+{ color: #eaf903;  } 
+
+
+
+.button{
+  padding: 5px 15px;
+  border: 1px solid gray;
+  border-radius: 5px;
+}
+
+.advance-search{
+  margin:0 15px;
+  text-decoration:none; 
+  color:white;
+  cursor: pointer;
+}
 
 </style>
