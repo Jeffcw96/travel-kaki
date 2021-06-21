@@ -1,8 +1,9 @@
 import Vue from 'vue'
 export default function user(http) {
     const state = {
-        origin: {},
-        destination: {},
+        original_location: {},
+        destination_location: {},
+        configurations: {},
         places: [],
         markers: [],
         activeMarkerIndex: null,
@@ -12,10 +13,10 @@ export default function user(http) {
 
     const getters = {
         getOriginPos(state) {
-            return state.origin
+            return state.original_location
         },
         getDestinationPos(state) {
-            return state.destination
+            return state.destination_location
         },
         getAddresses(state) {
             return { originAddress: state.originAddress, destinationAddress: state.destinationAddress }
@@ -29,14 +30,17 @@ export default function user(http) {
     }
 
     const mutations = {
-        updatePosition(state, { refLabel, lat, lng, placeId, address }) {
+        updatePosition(state, { fieldName, lat, lng, placeId }) {
             for (const [key, _] of Object.entries(state)) {
-                if (key === refLabel) {
+                if (key === fieldName) {
                     Vue.set(state[key], 'placeId', placeId)
                     Vue.set(state[key], 'lat', lat)
                     Vue.set(state[key], 'lng', lng)
                 }
             }
+        },
+        updateConfiguration(state, { fieldName, value }) {
+            Vue.set(state.configurations, fieldName, value)
         },
         setProfile(state, data) {
             state.profile = data

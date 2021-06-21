@@ -1,19 +1,20 @@
 <template>
-    <div style='position:relative'>
-        <div>
-            <pre>{{show}}</pre>
+    <div style='position:relative'>        
+        <div :class="parentClass">
+            <label>{{label}}</label>
             <input type="text" 
             v-model="search" 
             @keyup="filterSearch" 
-            @focus="showSelection"
-            @blur="hideSelection"/>
+            @click="showSelection"
+            @blur="hideSelection"
+            :class="cssClass"/>
         </div>
         <div v-show="show" class="suggestion-container">
             <ul>
                 <li v-for="(item,ind) of dropDownSuggestions"
                 :key="ind"
                 class="suggestion"
-                @click="selectDropDown(item.value)"
+                @mousedown="selectDropDown(item.label,item.value)"
                 >{{item.label}}</li>
             </ul>
         </div>
@@ -43,8 +44,8 @@ export default {
             default: [],
         },
         refLabel: {
-        type: String,
-        default: "",
+            type: String,
+            default: "",
         },
         label:{
             type:String,
@@ -52,15 +53,15 @@ export default {
         }
     },
     methods:{
-        selectDropDown(value){
-            console.log("drop down val",value)
+        selectDropDown(label,value){
+            this.search = label
+            this.$emit('update-value',value)
+            this.hideSelection()
         },
         showSelection(){
-            console.log("show")
             this.show = true
         },
         hideSelection(){
-            console.log("hide")
             this.show = false
         },
         filterSearch(){
@@ -78,12 +79,51 @@ export default {
 </script>
 <style >
 .suggestion{
-    padding:5px 10px;
-    border: 1px solid black;
+    padding: 10px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.suggestion:nth-child(even){
+    background: #fff8fa;
+}
+
+.suggestion:hover{
+    background: #fcbdce;
 }
  
 .suggestion-container{
     position: absolute;
     background: white;
+    z-index: 1;
+    width:100%;
 }
+
+ul{
+    margin: 0;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: scroll;
+    border: 1px solid gray;
+}
+
+
+::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(243, 241, 241, 0.623);
+	background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar
+{
+	width: 6px;
+	background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb
+{
+	background-color: #df5454;
+}
+
+
 </style>

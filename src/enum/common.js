@@ -4,6 +4,9 @@ module.exports = {
     HerokuProxy: 'https://cors-anywhere.herokuapp.com/',
     RouteRadiusThreshold: 1500, //this stands for Meter,
     MarkUpRouteDistance: 5000,
+    INPUT: 'input',
+    DROPDOWN: 'dropdown',
+    TEXTBOX: 'textbox',
     PlaceTypes: [
         {
             label: "Amusement Park",

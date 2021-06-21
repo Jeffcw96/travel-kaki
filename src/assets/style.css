@@ -22,6 +22,10 @@
     width: 250px;
 }
 
+.w-200{
+    width:200px
+}
+
 .border-standard{
     border: 1px solid rgb(65, 64, 64);
 }

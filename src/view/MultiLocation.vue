@@ -1,13 +1,19 @@
 <template>
-    <div class='container d-flex'>
-        <component v-for="(item,fieldName) in multiLocationSchema"
-        :key="item.refLabel"
-        :is="item.component"
-        v-bind="item"
-        @update-value="handleInput($event,item.refLabel,fieldName)" />
+    <div class="container">
+        <div class='d-flex'>
+            <component v-for="(item,fieldName) in multiLocationSchema"
+            :key="item.refLabel"
+            :is="item.component"
+            v-bind="item"
+            @update-value="handleInput($event,fieldName,item.type)" />
+        </div>
+        <div>
+
+        </div>
     </div>
 </template>
 <script>
+import {  INPUT, DROPDOWN } from '@/enum/common'
 import {mapMutations} from 'vuex'
 import multiLocation from '@/schema/multiLocation'
 export default {
@@ -18,13 +24,22 @@ export default {
         }
     },
     methods:{
-        ...mapMutations(["user/updatePosition"]),
-        handleInput(value,refLabel){
-            this["user/updatePosition"]({
-                refLabel,
-                lat:value.lat,
-                lng:value.lng,
-                placeId:value.placeId,
+        ...mapMutations(["user/updatePosition",
+                         "user/updateConfiguration"]),
+        handleInput(value,fieldName,type){
+            if(type=== INPUT){
+                this["user/updatePosition"]({
+                    fieldName,
+                    lat:value.lat,
+                    lng:value.lng,
+                    placeId:value.placeId,
+                });
+                return
+            }
+
+            this["user/updateConfiguration"]({
+                fieldName,
+                value
             });
         }
     }
