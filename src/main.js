@@ -7,7 +7,9 @@ import router from './router'
 import './assets/style.css';
 import axios from 'axios'
 Vue.config.productionTip = false
-let vuexStore = store(axios);
+let vuexStore = store(axios.create({
+  baseURL: "http://localhost:3000"
+}));
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

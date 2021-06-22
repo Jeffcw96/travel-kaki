@@ -8,13 +8,15 @@
             @update-value="handleInput($event,fieldName,item.type)" />
         </div>
         <div>
-
+            <div 
+            @click="search"
+            >Search</div>
         </div>
     </div>
 </template>
 <script>
 import {  INPUT, DROPDOWN } from '@/enum/common'
-import {mapMutations} from 'vuex'
+import {mapMutations, mapActions} from 'vuex'
 import multiLocation from '@/schema/multiLocation'
 export default {
     name:"MultiLocation",
@@ -26,6 +28,7 @@ export default {
     methods:{
         ...mapMutations(["user/updatePosition",
                          "user/updateConfiguration"]),
+        ...mapActions(['user/findDistance']),
         handleInput(value,fieldName,type){
             if(type=== INPUT){
                 this["user/updatePosition"]({
@@ -41,6 +44,9 @@ export default {
                 fieldName,
                 value
             });
+        },
+        async search(){
+            await this['user/findDistance']
         }
     }
 }

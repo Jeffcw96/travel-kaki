@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="button-container">
     <button
       class="button"
       @click.prevent="calculateDistanceMatric"
@@ -9,7 +9,6 @@
     >
       Search
     </button>
-    <small class="advance-search">Advanced Search</small>
   </div>
 </template>
 <script>
@@ -29,13 +28,13 @@ export default {
     };
   },
   watch: {
-    "$store.state.user.origin": {
+    "$store.state.user.original_location": {
       deep: true,
       handler() {
         this.gotOrigin = true;
       },
     },
-    "$store.state.user.destination": {
+    "$store.state.user.destination_location": {
       deep: true,
       handler() {
         this.gotDestination = true;
@@ -51,10 +50,10 @@ export default {
                
   },
   methods: {
-    ...mapMutations(['user/setMarkers',
-                    'user/setPlaces',
-                    'user/activeMarker']),
-    ...mapActions(["user/findDistance",
+    ...mapMutations(['user/activeMarker']),
+    ...mapActions(['user/listMarkers',
+                   'user/listPlaces',
+                   "user/findDistance",
                    "user/nearby",
                    "user/placeDetails",
                    'user/getPlaceImage']),
@@ -64,7 +63,6 @@ export default {
       const result = response.data.result
       const originAddress = result.origin_addresses[0];
       const destinationAddress = result.destination_addresses[0];
-
       const { latitude, longitude } = await this.currentLatAndLong();
 
       const map = this.getGoogleMap(latitude,longitude)
@@ -123,7 +121,7 @@ export default {
       const infoWindow = new google.maps.InfoWindow();
       for (let shops of shopsArr) {        
         const processedShops = shops.filter((shop) => {
-          return (shop.rating && shop.rating >= 3.0) && (shop.photos !== undefined);
+          return (shop.rating && shop.rating >= this.rating) && (shop.photos !== undefined);
         });
         this.allProcessedShops = [...this.allProcessedShops,...processedShops]
       }
@@ -163,8 +161,8 @@ export default {
         this.markerIndex++
         this.markers.push(marker)
       }
-      this['user/setMarkers'](this.markers)
-      this['user/setPlaces'](this.allProcessedShops)
+      this['user/listMarkers'](this.markers)
+      this['user/listPlaces'](this.allProcessedShops)
     },
     currentLatAndLong() {
       return new Promise((resolve, reject) => {
@@ -203,8 +201,16 @@ export default {
     }
   },
   computed:{
+    ...mapGetters(['user/getRating',
+                   'user/getType']),
     inputIsValid(){
       return  this.gotOrigin && this.gotDestination
+    },
+    rating(){
+      return this['user/getRating']
+    },
+    placeType(){
+      return this['user/getType']
     }
   }
 };
@@ -249,12 +255,21 @@ input:checked ,
 input:checked ~ label
 { color: #eaf903;  } 
 
-
+.button-container{
+  text-align: right;
+  padding: 10px ;
+}
 
 .button{
   padding: 5px 15px;
-  border: 1px solid gray;
-  border-radius: 5px;
+  border: 1px solid #58d696;
+  border-radius: 20px;
+  color: white;
+  background: #58d696;
+  font-weight: bold;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  font-family: 'Roboto', sans-serif
 }
 
 .advance-search{

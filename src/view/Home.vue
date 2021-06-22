@@ -1,8 +1,7 @@
 <template>
   <div>
     <UserUI />
-    <!-- <GoogleMap /> -->
-    <MultiLocation />
+    <GoogleMap />
   </div>
 </template>
 <script>

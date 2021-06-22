@@ -46,6 +46,7 @@ export default {
         cssClass: ['px-10', 'py-10', 'w-200', 'border-standard', 'd-block'],
         parentClass: ['text-left', 'font-white'],
         onlyNumber: true,
+        decimalPlaces: 1,
         numberFormat: [],
         validations: [string.isRequired]
     }

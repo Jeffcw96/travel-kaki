@@ -2,7 +2,7 @@
   <div :class="parentClasses">
     <label>{{label}}</label>
     <input
-      type="text"
+      :type="inputType"
       :placeholder="placeholderLabel"
       @input="handleInput"
       :ref="refLabel"
@@ -36,6 +36,14 @@ export default {
       type:String,
       default: "",
     },
+    onlyNumber:{
+      type:Boolean,
+      default:false
+    },
+    decimalPlaces:{
+      type:Number,
+      default:0
+    },
     validations:{
         type:Array,
         default:[]
@@ -50,6 +58,11 @@ export default {
   },
   methods: {    
     handleInput() {
+      if(this.onlyNumber){
+        this.inputVal = parseFloat(this.inputVal)
+      }
+
+      console.log("this.inputVal", typeof(this.inputVal))
       this.$emit("update-value",this.inputVal)
     },
   },
@@ -68,7 +81,13 @@ export default {
         })
 
         console.log("this.errors",this.errors)
-    }
+    },
+    inputType(){
+      if(this.onlyNumber){
+        return "number"
+      }
+      return "text"
+    },
   },
 };
 </script>

@@ -26,6 +26,12 @@ export default function user(http) {
         },
         getMarkers(state) {
             return state.markers.flat(Infinity)
+        },
+        getRating(state) {
+            return state.configurations.rating || "4.0"
+        },
+        getType(state) {
+            return state.configurations.type || "restaurant"
         }
     }
 
@@ -40,6 +46,7 @@ export default function user(http) {
             }
         },
         updateConfiguration(state, { fieldName, value }) {
+            console.log("fieldName", fieldName, "typeof", typeof (value))
             Vue.set(state.configurations, fieldName, value)
         },
         setProfile(state, data) {
@@ -47,7 +54,6 @@ export default function user(http) {
         },
 
         setPlaces(state, place) {
-            console.log('setPlaces', place)
             state.places.push(place)
         },
 
@@ -55,6 +61,15 @@ export default function user(http) {
             console.log("set markers", markers)
             state.markers.push(markers)
         },
+
+        clearPlaces(state) {
+            state.places = []
+        },
+
+        clearMarkers(state) {
+            state.markers = []
+        },
+
 
         activeMarker(state, activeIndex) {
             console.log('activeMarker', activeIndex)
@@ -64,13 +79,13 @@ export default function user(http) {
 
     const actions = {
         async findDistance({ commit, state }) {
-            return await http.get(`http://localhost:3000/api/finddistance?originPlaceId=${state.origin.placeId}&destinationPlaceId=${state.destination.placeId}`)
+            return await http.get(`/api/finddistance?originPlaceId=${state.original_location.placeId}&destinationPlaceId=${state.destination_location.placeId}`)
         },
 
-        async nearby({ commit }, { locationsGeometry, radius: radius = 1000 }) {
+        async nearby({ commit, getters }, { locationsGeometry, radius: radius = 1000 }) {
             const jsonObj = {}
             jsonObj.locationsGeometry = locationsGeometry
-            jsonObj.type = "restaurant"
+            jsonObj.type = getters.getType
             jsonObj.radius = radius
             return await http.post('http://localhost:3000/api/nearby', jsonObj)
         },
@@ -81,8 +96,17 @@ export default function user(http) {
 
         async getPlaceImage({ commit }, imageUrl) {
             return await http.post('http://localhost:3000/api/placeImage', { imageUrl })
-        }
+        },
 
+        listPlaces({ state, commit }, place) {
+            // commit("clearPlaces")
+            commit("setPlaces", place)
+        },
+
+        listMarkers({ state, commit }, markers) {
+            // commit("clearMarkers")
+            commit("setMarkers", markers)
+        },
     }
 
     return {

@@ -1,5 +1,7 @@
 <template>
-      <div class="user-ui-container" :class="{active:!menuIsActive}">
+      <div class="user-ui-container" 
+      :class="{active:!menuIsActive}" 
+      :style="'background-image:url('+backgroundImg+')'">>
         <div class="arrow-container" @click="toggleMenu" v-show="!menuIsActive">
           <span class="arrow-right">
             <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
@@ -15,39 +17,24 @@
           </span>
         </div>
         <div class="d-flex align-items-center">
-          <AddressInput
-            :refLabel="'origin'"
-            placeholderLabel="From"
-            :cssClass="[
-              'mx-10',
-              'my-10',
-              'px-10',
-              'py-10',
-              'w-250',
-              'border-standard',
-            ]"
-          />
-          <AddressInput
-            :refLabel="'destination'"
-            placeholderLabel="To"
-            :cssClass="[
-              'mx-10',
-              'my-10',
-              'px-10',
-              'py-10',
-              'w-250',
-              'border-standard',
-            ]"
-          />
-          <DistanceMatric />
+            <component v-for="(item,fieldName) in multiLocationSchema"
+            :key="item.refLabel"
+            :is="item.component"
+            v-bind="item"
+            @update-value="handleInput($event,fieldName,item.type)" />
         </div>
+        <DistanceMatric />
       <PlacesDetail/>
     </div>
 </template>
 <script>
+import backgroundImg from '@/assets/mountain.jpg'
 import DistanceMatric from "@/components/DistanceMatric";
 import PlacesDetail from "@/components/PlacesDetail"
 import AddressInput from "@/components/AddressInput";
+import {  INPUT, DROPDOWN } from '@/enum/common'
+import {mapMutations, mapActions} from 'vuex'
+import multiLocation from '@/schema/multiLocation'
 export default {
   name: "UserUI",
   components: {
@@ -57,10 +44,39 @@ export default {
   },
   data(){
     return{
-      menuIsActive:false
+      menuIsActive:true,
+      backgroundImg:backgroundImg
     }
   },
+  computed:{
+    multiLocationSchema(){
+        return multiLocation
+    }
+  },
+
   methods:{
+    ...mapMutations(["user/updatePosition",
+                    "user/updateConfiguration"]),
+    ...mapActions(['user/findDistance']),
+    handleInput(value,fieldName,type){
+      if(type=== INPUT){
+          this["user/updatePosition"]({
+              fieldName,
+              lat:value.lat,
+              lng:value.lng,
+              placeId:value.placeId,
+          });
+          return
+      }
+
+      this["user/updateConfiguration"]({
+            fieldName,
+            value
+      });
+    },
+    async search(){
+        await this['user/findDistance']
+    },
     toggleMenu(){
       this.menuIsActive = !this.menuIsActive
     }
@@ -68,12 +84,20 @@ export default {
 };
 </script>
 <style>
+
+.container{
+    /* background: rgb(247, 98, 98); */
+    padding: 10px;
+}
+
 .user-ui-container {
   position: absolute;
   z-index: 999;
   top: 50px;
   left: 0;
-  background: rgb(255, 71, 71);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   padding-right: 20px;
   padding-bottom: 10px;
   border-bottom-right-radius: 5px;
@@ -87,7 +111,7 @@ export default {
 }
 
 .arrow-container{
-    background: rgb(255, 71, 71);
+    background-image: linear-gradient(270deg, #000000 0%, #2c3e50 74%);
     padding: 5px;
     position: absolute;
     right: -35px;

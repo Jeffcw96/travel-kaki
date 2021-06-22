@@ -2,12 +2,26 @@
     <div style='position:relative'>        
         <div :class="parentClass">
             <label>{{label}}</label>
-            <input type="text" 
-            v-model="search" 
-            @keyup="filterSearch" 
-            @click="showSelection"
-            @blur="hideSelection"
-            :class="cssClass"/>
+            <div style='position:relative'>
+                <input type="text" 
+                v-model="search" 
+                @keyup="filterSearch" 
+                @click="showSelection"
+                @blur="hideSelection"
+                :class="cssClass"/>
+                <div class="icons">
+                    <span class="icon" v-show="!show">
+                        <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M455,113a15,15 0 01 19,0l29,29a15,15 0 01 0,19l-235,236a16,16 0 01-24,0l-235-236a15,15 0 01 0-19l29-29a15,15 0 01 19,0l199,199z" />
+                        </svg>
+                    </span>
+                    <span class="icon" v-show="show">
+                            <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M256,200l-199,199a15,15 0 01-19,0l-29-29a15,15 0 01 0-19l235-236a16,16 0 01 24,0l235,236a15,15 0 01 0,19l-29,29a15,15 0 01-19,0z" />
+                            </svg>
+                    </span>
+                </div>
+            </div>
         </div>
         <div v-show="show" class="suggestion-container">
             <ul>
@@ -125,5 +139,27 @@ ul{
 	background-color: #df5454;
 }
 
+.icons{
+    position: absolute;
+    right: 0;
+    top:50%;
+    transform: translateY(-50%);
+}
+
+.icon {
+  flex: 0 0 auto;
+  padding: 5px;
+  display: block;
+  fill: #000;
+  stroke: #000;
+}
+
+.icon svg { 
+  --size: 0.8em;
+
+  fill: inherit;
+  min-height: var(--size);
+  min-width:  var(--size);
+}
 
 </style>
