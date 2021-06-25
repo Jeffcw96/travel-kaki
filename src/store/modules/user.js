@@ -7,6 +7,9 @@ export default function user(http) {
         places: [],
         markers: [],
         activeMarkerIndex: null,
+        advancedGeometry: {
+            locationsGeometry: []
+        },
         originAddress: "",
         destinationAddress: "",
     }
@@ -54,12 +57,11 @@ export default function user(http) {
         },
 
         setPlaces(state, place) {
-            state.places.push(place)
+            state.places = [...state.places, ...place]
         },
 
         setMarkers(state, markers) {
-            console.log("set markers", markers)
-            state.markers.push(markers)
+            state.markers = [...state.markers, ...markers]
         },
 
         clearPlaces(state) {
@@ -72,8 +74,16 @@ export default function user(http) {
 
 
         activeMarker(state, activeIndex) {
-            console.log('activeMarker', activeIndex)
+            console.log('activeMarker 123', activeIndex)
             state.activeMarkerIndex = activeIndex
+        },
+
+        setAdvanceGeometry(state, { locationsGeometry, radius }) {
+            console.log("locationsGeometry", locationsGeometry, radius)
+            const processedlocationsGeometry = locationsGeometry.map((geometry) => {
+                return { ...geometry, radius: radius }
+            })
+            Vue.set(state.advancedGeometry, "locationsGeometry", processedlocationsGeometry)
         }
     }
 
@@ -82,11 +92,18 @@ export default function user(http) {
             return await http.get(`/api/finddistance?originPlaceId=${state.original_location.placeId}&destinationPlaceId=${state.destination_location.placeId}`)
         },
 
-        async nearby({ commit, getters }, { locationsGeometry, radius: radius = 1000 }) {
+        async nearby({ state, commit, getters }, { locationsGeometry }) {
+            console.log("advance geometry", state.advancedGeometry, state.advancedGeometry.length)
+            console.log('locationGeometry', locationsGeometry, locationsGeometry.length)
+
+
+
+            const allLocationsGeometry = [...locationsGeometry, ...state.advancedGeometry.locationsGeometry]
+            console.log(allLocationsGeometry)
             const jsonObj = {}
-            jsonObj.locationsGeometry = locationsGeometry
+            jsonObj.locationsGeometry = allLocationsGeometry
             jsonObj.type = getters.getType
-            jsonObj.radius = radius
+            jsonObj.rating = getters.getRating
             return await http.post('http://localhost:3000/api/nearby', jsonObj)
         },
 
@@ -99,13 +116,16 @@ export default function user(http) {
         },
 
         listPlaces({ state, commit }, place) {
-            // commit("clearPlaces")
             commit("setPlaces", place)
         },
 
         listMarkers({ state, commit }, markers) {
-            // commit("clearMarkers")
             commit("setMarkers", markers)
+        },
+
+        resetLocation({ state, commit }) {
+            commit("clearPlaces")
+            commit("clearMarkers")
         },
     }
 

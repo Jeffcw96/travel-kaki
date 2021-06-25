@@ -8,9 +8,9 @@
                 class="item"
                 v-for="(place, ind) in places"
                 :key="ind"
-                :ref="`marker-${ind}`"
-                @click="showInfoWindow(ind)"
-                :class="{ active: ind === activeIndex }"
+                :ref="`marker-${place.place_id}`"
+                @click="showInfoWindow(place.place_id)"
+                :class="{ active: place.place_id === activeIndex }"
                 style="cursor: pointer; padding:10px"
             >
                 <div class="content">
@@ -55,9 +55,9 @@ export default {
     },
     methods:{
         ...mapMutations(['user/activeMarker']),
-        showInfoWindow(index) {
-            this.activeIndex = index;
-            this['user/activeMarker'](index)
+        showInfoWindow(place_id) {
+            this.activeIndex = place_id;
+            this['user/activeMarker'](place_id)
         },
     },
     computed:{

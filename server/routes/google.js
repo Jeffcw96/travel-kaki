@@ -4,10 +4,10 @@ const axios = require('axios')
 
 router.post("/nearby", async (req, res) => {
     try {
-        const { locationsGeometry, type, radius } = req.body
+        const { locationsGeometry, type, rating } = req.body
         const promises = []
         for (let geometry of locationsGeometry) {
-            const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${geometry.lat},${geometry.lng}&type=${type}&radius=${radius}&key=${process.env.APIKey}&opennow&rankby=prominence`;
+            const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${geometry.lat},${geometry.lng}&type=${type}&radius=${geometry.radius}&key=${process.env.APIKey}&opennow&rankby=prominence`;
             promises.push(axios.get(URL))
         }
 
@@ -20,8 +20,38 @@ router.post("/nearby", async (req, res) => {
             }
             shopsArr.push(result.data.results)
         }
+        // shopsArr.forEach(shops => {
+        //     shops.forEach(shop => {
+        //         console.log(shop.place_id)
+        //     })
+        // })
 
-        res.json({ shops: shopsArr, moreShops: moreShops })
+
+        const combinedArray = []
+        shopsArr.forEach(shops => {
+            shops.forEach(shop => {
+                const x = combinedArray.find(item => item.place_id === shop.place_id);
+                if (!x) {
+                    const placeObj = {}
+                    placeObj.place_id = shop.place_id
+                    placeObj.geometry = shop.geometry
+                    placeObj.rating = shop.rating
+                    combinedArray.push(placeObj)
+                }
+            })
+        })
+
+
+        // const filteredArr = combinedArray.reduce((acc, current) => {
+        //     const x = acc.find(item => item.place_id === current.place_id);
+        //     if (!x) {
+        //         return acc.concat([current]);
+        //     } else {
+        //         return acc;
+        //     }
+        // }, []);
+
+        res.json({ shops: combinedArray, moreShops: moreShops })
 
     } catch (error) {
         console.error(error.message)

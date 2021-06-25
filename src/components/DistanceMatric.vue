@@ -21,7 +21,7 @@ export default {
     return {
       gotOrigin: false,
       gotDestination: false,
-      markers:[],
+      markers:{},
       markerIndex:0,
       shopIndex:0,
       allProcessedShops:[]
@@ -43,6 +43,7 @@ export default {
     "$store.state.user.activeMarkerIndex": {
       deep: true,
       handler(activeMarkerIndex) {
+        console.log('all markers',this.markers)
          new google.maps.event.trigger(this.markers[activeMarkerIndex], "click");
 
       },
@@ -50,13 +51,19 @@ export default {
                
   },
   methods: {
-    ...mapMutations(['user/activeMarker']),
+    ...mapMutations(['user/activeMarker',
+                    'user/setAdvanceGeometry']),
     ...mapActions(['user/listMarkers',
                    'user/listPlaces',
                    "user/findDistance",
+                   "user/resetLocation",
                    "user/nearby",
                    "user/placeDetails",
                    'user/getPlaceImage']),
+    resetPlacesMarkers(){
+        this.allProcessedShops = []
+        this.markers = []
+    } ,                  
     async calculateDistanceMatric() {
       if (!this.inputIsValid) return;
       const response = await this["user/findDistance"]();
@@ -76,9 +83,10 @@ export default {
         },
         async (response, status) => {
           if (status === "OK") {
-            console.log(response);
             directionsRenderer.setDirections(response);
             directionsRenderer.setMap(map);
+            this["user/resetLocation"]()
+            this.resetPlacesMarkers()
             this.nearBySearch(response.routes[0].legs[0].steps,map)
           }
         }
@@ -98,8 +106,7 @@ export default {
             }
             return acc                                   
           },[])
-          const result = await this["user/nearby"]({locationsGeometry:routesPathLocation, radius:radius*1000})
-          this.labelMarker(result,map)
+          this['user/setAdvanceGeometry']({locationsGeometry:routesPathLocation, radius:radius*1000})
           continue
         }
 
@@ -108,7 +115,7 @@ export default {
         if (accumulatorDistance >= RouteRadiusThreshold || i === allRoutes.length - 1){
             const startLat = allRoutes[i].start_location.lat();
             const startLng = allRoutes[i].start_location.lng();
-            const location = {lat:startLat, lng:startLng}
+            const location = {lat:startLat, lng:startLng, radius:1000}
             locationsGeometry.push(location)                                               
             accumulatorDistance = 0;
           }
@@ -118,15 +125,8 @@ export default {
     },
     labelMarker(result,map){
       const shopsArr = result.data.shops
-      const infoWindow = new google.maps.InfoWindow();
-      for (let shops of shopsArr) {        
-        const processedShops = shops.filter((shop) => {
-          return (shop.rating && shop.rating >= this.rating) && (shop.photos !== undefined);
-        });
-        this.allProcessedShops = [...this.allProcessedShops,...processedShops]
-      }
-      for (let shop of this.allProcessedShops) {
-        const currentMarkerIndex = this.markerIndex
+      const infoWindow = new google.maps.InfoWindow();  
+      for (let shop of shopsArr) {
         const placeId = shop.place_id;
         const { lat, lng } = shop.geometry.location;
         const marker = new google.maps.Marker({
@@ -135,18 +135,15 @@ export default {
         });
 
         google.maps.event.addListener(marker, "click", async () => {
-          console.log("marker button clicked",marker, shop,currentMarkerIndex)
-          this['user/activeMarker'](currentMarkerIndex)
+          this['user/activeMarker'](placeId)
           map.setZoom(15);
           map.setCenter(marker.getPosition());            
           const response = await this["user/placeDetails"]({placeId})
           
           const placeDetails = response.data.result;
           let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
-          console.log("placeDetails", response);
 
           const formattedRating = this.roundDownNearest(placeDetails.rating,0.5)
-          console.log("formattedRating",typeof(placeDetails.rating), formattedRating)
           const base64ImageUrl = await this['user/getPlaceImage'](imageUrl)            
 
           let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)          
@@ -158,9 +155,11 @@ export default {
 
 
         });
-        this.markerIndex++
-        this.markers.push(marker)
+
+        this.markers= {...this.markers, placeId:marker}
       }
+      console.log(this.markers)
+      console.log(this.allProcessedShops)
       this['user/listMarkers'](this.markers)
       this['user/listPlaces'](this.allProcessedShops)
     },
@@ -193,7 +192,6 @@ export default {
     },
     roundDownNearest(rating,interval){
       const floor = parseFloat(Math.floor(rating))
-      console.log("floor",floor,rating)
       if(rating - floor < interval){
         return floor
       }

@@ -3,7 +3,7 @@ module.exports = {
     GoogleEndPoint: 'https://maps.googleapis.com/maps/api',
     HerokuProxy: 'https://cors-anywhere.herokuapp.com/',
     RouteRadiusThreshold: 1500, //this stands for Meter,
-    MarkUpRouteDistance: 5000,
+    MarkUpRouteDistance: 10000,
     INPUT: 'input',
     DROPDOWN: 'dropdown',
     TEXTBOX: 'textbox',

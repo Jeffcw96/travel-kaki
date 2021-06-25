@@ -45,7 +45,7 @@ export default {
   methods: {    
     handleInput({ target }) {},
     handleAddressInput() {
-      console.log("autocomplete", this.autocomplete.getPlace());
+     
     },
   },
   computed: {
@@ -66,7 +66,6 @@ export default {
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
-      console.log("place", place);
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
       const placeId = place.place_id;
