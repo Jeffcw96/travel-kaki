@@ -5,6 +5,11 @@
 import { mapGetters } from "vuex";
 export default {
   name: "GoogleMap",
+  data(){
+    return{
+      circle:null
+    }
+  },
   methods: {
     currentLatAndLong() {
       return new Promise((resolve, reject) => {
@@ -26,11 +31,24 @@ export default {
       });
     },
   },
+  watch:{
+    getCircleAreaRadius:{
+      handler(val){
+        console.log("radius val",val)
+        this.circle.setRadius(val)
+      }
+    },
+    deep:true
+  },
   computed: {
-    ...mapGetters(["user/getAddresses"]),
+    ...mapGetters(["user/getAddresses",
+                  "user/getCircleAreaRadius"]),
     getAddresses() {
       return this["user/getAddresses"];
     },
+    getCircleAreaRadius(){
+      return parseInt(this["user/getCircleAreaRadius"])
+    }
   },
   async mounted() {
     const { latitude, longitude } = await this.currentLatAndLong();
@@ -38,7 +56,19 @@ export default {
       zoom: 15,
       center: new google.maps.LatLng(latitude, longitude),
       mapTypeId: google.maps.MapTypeId.ROADMAP,
+      
     });
+    const cityCircle = new google.maps.Circle({
+      strokeColor: "#5fe3ff",
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: "#5fe3ff",
+      fillOpacity: 0.35,
+      map,
+      center: new google.maps.LatLng(latitude, longitude),
+      radius: this.getCircleAreaRadius,
+    });
+    this.circle = cityCircle
     const directionsService = new google.maps.DirectionsService();
   },
 };

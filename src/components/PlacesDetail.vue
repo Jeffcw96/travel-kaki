@@ -8,9 +8,9 @@
                 class="item"
                 v-for="(place, ind) in places"
                 :key="ind"
-                :ref="`marker-${place.place_id}`"
-                @click="showInfoWindow(place.place_id)"
-                :class="{ active: place.place_id === activeIndex }"
+                :ref="`marker-${ind}`"
+                @click="showInfoWindow(ind)"
+                :class="{ active: ind === activeIndex }"
                 style="cursor: pointer; padding:10px"
             >
                 <div class="content">
@@ -47,7 +47,6 @@ export default {
                 this.activeIndex = activeMarkerIndex
                 const el = this.$refs[`marker-${activeMarkerIndex}`]               
                 if (el) {
-                     console.log("el",el)
                     el[0].scrollIntoView({behavior: 'smooth'});
                 }
             },

@@ -23,6 +23,9 @@
             v-bind="item"
             @update-value="handleInput($event,fieldName,item.type)" />
         </div>
+        <div>
+            <input type="range" min="1000" max="5000" v-model="radius" @input="handleRadiusSlider">
+        </div>
         <DistanceMatric />
       <PlacesDetail/>
     </div>
@@ -45,7 +48,8 @@ export default {
   data(){
     return{
       menuIsActive:true,
-      backgroundImg:backgroundImg
+      backgroundImg:backgroundImg,
+      radius:1000
     }
   },
   computed:{
@@ -56,7 +60,8 @@ export default {
 
   methods:{
     ...mapMutations(["user/updatePosition",
-                    "user/updateConfiguration"]),
+                    "user/updateConfiguration",
+                    "user/setCircleAreaRadius"]),
     ...mapActions(['user/findDistance']),
     handleInput(value,fieldName,type){
       if(type=== INPUT){
@@ -79,6 +84,9 @@ export default {
     },
     toggleMenu(){
       this.menuIsActive = !this.menuIsActive
+    },
+    handleRadiusSlider(){
+      this["user/setCircleAreaRadius"](this.radius)
     }
   }
 };

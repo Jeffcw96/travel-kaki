@@ -61,7 +61,6 @@ export default {
                    "user/placeDetails",
                    'user/getPlaceImage']),
     resetPlacesMarkers(){
-        this.allProcessedShops = []
         this.markers = []
     } ,                  
     async calculateDistanceMatric() {
@@ -126,7 +125,8 @@ export default {
     labelMarker(result,map){
       const shopsArr = result.data.shops
       const infoWindow = new google.maps.InfoWindow();  
-      for (let shop of shopsArr) {
+      for (let i = 0; i<shopsArr.length; i++) {
+        const shop = shopsArr[i]
         const placeId = shop.place_id;
         const { lat, lng } = shop.geometry.location;
         const marker = new google.maps.Marker({
@@ -134,8 +134,9 @@ export default {
           map: map,
         });
 
+        this.markers.push(marker)
         google.maps.event.addListener(marker, "click", async () => {
-          this['user/activeMarker'](placeId)
+          this['user/activeMarker'](i)
           map.setZoom(15);
           map.setCenter(marker.getPosition());            
           const response = await this["user/placeDetails"]({placeId})
@@ -152,16 +153,14 @@ export default {
           output = output.replace(/{%placeImage%}/g, base64ImageUrl.data.url)
           infoWindow.setContent(output);
           infoWindow.open(map, marker);
-
-
         });
 
-        this.markers= {...this.markers, placeId:marker}
+
       }
       console.log(this.markers)
       console.log(this.allProcessedShops)
       this['user/listMarkers'](this.markers)
-      this['user/listPlaces'](this.allProcessedShops)
+      this['user/listPlaces'](shopsArr)
     },
     currentLatAndLong() {
       return new Promise((resolve, reject) => {

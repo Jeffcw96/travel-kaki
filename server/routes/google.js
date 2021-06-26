@@ -36,6 +36,8 @@ router.post("/nearby", async (req, res) => {
                     placeObj.place_id = shop.place_id
                     placeObj.geometry = shop.geometry
                     placeObj.rating = shop.rating
+                    placeObj.name = shop.name
+                    placeObj.vicinity = shop.vicinity
                     combinedArray.push(placeObj)
                 }
             })

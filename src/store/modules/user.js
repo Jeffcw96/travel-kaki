@@ -12,6 +12,7 @@ export default function user(http) {
         },
         originAddress: "",
         destinationAddress: "",
+        circleRadius: 1000
     }
 
     const getters = {
@@ -35,6 +36,9 @@ export default function user(http) {
         },
         getType(state) {
             return state.configurations.type || "restaurant"
+        },
+        getCircleAreaRadius(state) {
+            return state.circleRadius
         }
     }
 
@@ -84,6 +88,10 @@ export default function user(http) {
                 return { ...geometry, radius: radius }
             })
             Vue.set(state.advancedGeometry, "locationsGeometry", processedlocationsGeometry)
+        },
+
+        setCircleAreaRadius(state, radius) {
+            state.circleRadius = radius
         }
     }
 
