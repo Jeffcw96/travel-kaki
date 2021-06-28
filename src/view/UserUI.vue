@@ -1,4 +1,4 @@
-<template>
+<template style="position:relative">
       <div class="user-ui-container" 
       :class="{active:!menuIsActive}" 
       :style="'background-image:url('+backgroundImg+')'">>
@@ -16,16 +16,7 @@
             </svg>
           </span>
         </div>
-        <div class="d-flex align-items-center">
-            <component v-for="(item,fieldName) in multiLocationSchema"
-            :key="item.refLabel"
-            :is="item.component"
-            v-bind="item"
-            @update-value="handleInput($event,fieldName,item.type)" />
-        </div>
-        <div>
-            <input type="range" min="1000" max="5000" v-model="radius" @input="handleRadiusSlider">
-        </div>
+        <UserInput />    
         <DistanceMatric />
       <PlacesDetail/>
     </div>
@@ -35,7 +26,8 @@ import backgroundImg from '@/assets/mountain.jpg'
 import DistanceMatric from "@/components/DistanceMatric";
 import PlacesDetail from "@/components/PlacesDetail"
 import AddressInput from "@/components/AddressInput";
-import {  INPUT, DROPDOWN } from '@/enum/common'
+import MultiLocationInput from "@/view/components/MultiLocation"
+import UserInput from '@/view/components/UserInput'
 import {mapMutations, mapActions} from 'vuex'
 import multiLocation from '@/schema/multiLocation'
 export default {
@@ -43,7 +35,9 @@ export default {
   components: {
     AddressInput,
     DistanceMatric,
-    PlacesDetail
+    PlacesDetail,
+    MultiLocationInput,
+    UserInput
   },
   data(){
     return{
@@ -59,29 +53,8 @@ export default {
   },
 
   methods:{
-    ...mapMutations(["user/updatePosition",
-                    "user/updateConfiguration",
-                    "user/setCircleAreaRadius"]),
+    ...mapMutations(["user/setCircleAreaRadius"]),
     ...mapActions(['user/findDistance']),
-    handleInput(value,fieldName,type){
-      if(type=== INPUT){
-          this["user/updatePosition"]({
-              fieldName,
-              lat:value.lat,
-              lng:value.lng,
-              placeId:value.placeId,
-          });
-          return
-      }
-
-      this["user/updateConfiguration"]({
-            fieldName,
-            value
-      });
-    },
-    async search(){
-        await this['user/findDistance']
-    },
     toggleMenu(){
       this.menuIsActive = !this.menuIsActive
     },

@@ -1,5 +1,6 @@
-import { PlaceTypes, INPUT, DROPDOWN } from '@/enum/common'
+import { PlaceTypes, INPUT, DROPDOWN, SLIDER, Kilometer } from '@/enum/common'
 import AddressInput from '@/components/AddressInput'
+import Slider from '@/components/Slider'
 import Dropdown from '@/components/Dropdown'
 import TextBox from '@/components/TextBox'
 import { string } from '@/validations/common'
@@ -11,18 +12,9 @@ export default {
         placeholderLabel: 'Origin',
         refLabel: "origin",
         type: INPUT,
+        allowNearBy: true,
         cssClass: ['px-10', 'py-10', 'w-250', 'border-standard', 'd-block', 'border-right-0'],
-        parentClass: ['text-left', 'font-white'],
-        validations: []
-    },
-    destination_location: {
-        component: AddressInput,
-        label: "To",
-        placeholderLabel: 'Destination',
-        refLabel: "destination",
-        type: INPUT,
-        cssClass: ['px-10', 'py-10', 'w-250', 'border-standard', 'd-block', 'border-right-0'],
-        parentClass: ['text-left', 'font-white'],
+        parentClass: ['text-left', 'font-white', 'position-relative'],
         validations: []
     },
     type: {
@@ -49,5 +41,18 @@ export default {
         decimalPlaces: 1,
         numberFormat: [],
         validations: [string.isRequired]
+    },
+    radius: {
+        component: Slider,
+        label: "Radius",
+        refLabel: "radius",
+        type: SLIDER,
+        unit: Kilometer,
+        defaultValue: 1000,
+        min: 0,
+        max: 10,
+        cssClass: ['d-block', 'my-10'],
+        parentClass: ['text-left', 'font-white', 'p-5'],
+        validations: []
     }
 }

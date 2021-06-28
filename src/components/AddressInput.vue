@@ -1,19 +1,32 @@
 <template>
-  <div :class="parentClasses">
+  <div :class="parentClasses" >
     <label>{{label}}</label>
     <input
       type="text"
       :placeholder="placeholderLabel"
-      @input="handleInput"
       :ref="refLabel"
       :class="classes"
+      :value="currentLocation"
     />
+    <div v-if="allowNearBy" 
+    class="position-absolute nearby-icon"
+    @click="searchMyLocation">
+      <img :src="locationImg" alt="location" />
+    </div>
   </div>
 </template>
 <script>
-import { mapMutations } from "vuex";
+import {mapActions, mapGetters} from 'vuex'
+import locationImg from '@/assets/location.png'
 export default {
   name: "AddressInput",
+  data() {
+    return {
+      addressLat: null,
+      addressLng: null,
+      locationImg:locationImg
+    };
+  },
   props: {
     placeholderLabel: {
       type: String,
@@ -34,26 +47,28 @@ export default {
     label:{
       type:String,
       default: "",
+    },
+    allowNearBy:{
+      type:Boolean,
+      default:false
     }
   },
-  data() {
-    return {
-      addressLat: null,
-      addressLng: null,
-    };
-  },
-  methods: {    
-    handleInput({ target }) {},
-    handleAddressInput() {
-     
-    },
+  methods: {   
+    ...mapActions(['user/getCurrentLocation']),
+    async searchMyLocation(){
+      await this['user/getCurrentLocation']()
+    }
   },
   computed: {
+    ...mapGetters(['user/currentLocation']),
     classes() {
       return this.cssClass.join(" ");
     },
     parentClasses(){
       return this.parentClass.join(" ");
+    },
+    currentLocation(){
+      return this['user/currentLocation'] || ''
     }
   },
   mounted() {
@@ -77,5 +92,16 @@ export default {
 <style scoped>
 ::placeholder {
   font-style:italic;
+}
+
+.nearby-icon{
+  max-width: 30px;
+  top: 22px;
+  right: 5px;
+  cursor:pointer;
+}
+
+.nearby-icon img{
+  width:100%
 }
 </style>

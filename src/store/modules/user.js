@@ -12,6 +12,7 @@ export default function user(http) {
         },
         originAddress: "",
         destinationAddress: "",
+        currentLocation: "",
         circleRadius: 1000
     }
 
@@ -39,6 +40,9 @@ export default function user(http) {
         },
         getCircleAreaRadius(state) {
             return state.circleRadius
+        },
+        currentLocation(state) {
+            return state.currentLocation
         }
     }
 
@@ -92,6 +96,11 @@ export default function user(http) {
 
         setCircleAreaRadius(state, radius) {
             state.circleRadius = radius
+        },
+
+        setCurrentLocation(state, address) {
+            state.originAddress = address
+            state.currentLocation = address
         }
     }
 
@@ -123,6 +132,26 @@ export default function user(http) {
             return await http.post('http://localhost:3000/api/placeImage', { imageUrl })
         },
 
+        async getCurrentLocation({ dispatch }) {
+            const { latitude, longitude } = await currentLatAndLong();
+            dispatch('getAddressByGeometry', { latitude, longitude })
+        },
+
+        async getAddressByGeometry({ commit }, params) {
+            try {
+                const result = await http.get(
+                    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${params.latitude},${params.longitude}&key=AIzaSyC4_m7mmLO59skzR9hyYEj1sgxKuHjtzo4`
+                );
+                const { formatted_address } = result.data.results[0];
+
+                if (result.data.error_message) throw error_message;
+                commit('setCurrentLocation', formatted_address)
+
+            } catch (error) {
+
+            }
+        },
+
         listPlaces({ state, commit }, place) {
             commit("setPlaces", place)
         },
@@ -145,4 +174,26 @@ export default function user(http) {
         actions
     }
 
+}
+
+function currentLatAndLong() {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                if (position.coords.latitude && position.coords.longitude) {
+                    console.log(
+                        position.coords.latitude && position.coords.longitude
+                    );
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                }
+            },
+            (error) => {
+                reject(error.message);
+            },
+            { enableHighAccuracy: true }
+        );
+    });
 }

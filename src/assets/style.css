@@ -12,6 +12,9 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+.gmnoprint{
+    display: none !important;
+}
 body{
     font-family: 'Roboto', sans-serif !important;
 }
@@ -26,6 +29,10 @@ body{
     margin-bottom: 10px;
 }
 
+.p-5{
+    padding: 5px;
+}
+
 .px-10{
     padding-left: 10px;
     padding-right: 10px;
@@ -34,6 +41,14 @@ body{
 .py-10{
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+.position-relative{
+    position:relative
+}
+
+.position-absolute{
+    position:absolute
 }
 
 .w-250{
