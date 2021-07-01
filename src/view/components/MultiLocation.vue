@@ -11,7 +11,7 @@
 import {mapMutations} from 'vuex'
 import {  INPUT, DROPDOWN } from '@/enum/common'
 import multiLocation from '@/schema/multiLocation'
-export default{
+export default {
     name:"MultiLocation",
     computed:{
         multiLocationSchema(){

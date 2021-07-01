@@ -13,7 +13,7 @@ import {mapMutations} from 'vuex'
 import {  INPUT, SLIDER } from '@/enum/common'
 import nearby from '@/schema/nearby'
 
-export default{
+export default {
     name:"Nearby",
     computed:{
         nearbySchema(){

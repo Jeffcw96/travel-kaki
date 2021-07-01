@@ -3,11 +3,14 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
+import {Tabs} from "@/enum/common"
 export default {
   name: "GoogleMap",
   data(){
     return{
-      circle:null
+      circle:null,
+      strokeOpacity: 0,
+      fillOpacity: 0
     }
   },
   methods: {
@@ -34,15 +37,30 @@ export default {
   watch:{
     getCircleAreaRadius:{
       handler(val){
-        console.log("radius val",val)
         this.circle.setRadius(val)
-      }
+      },
+      deep:true
     },
-    deep:true
+    activeTab:{
+      handler(val){
+        if(this.circle){
+          if(val === Tabs.multilocation){
+              this.circle.setOptions({fillOpacity:0, strokeOpacity:0});
+            return
+          }
+          this.circle.setOptions({fillOpacity:0.35, strokeOpacity:0.8});
+        }
+      },
+      immediate:true
+    },
   },
   computed: {
     ...mapGetters(["user/getAddresses",
-                  "user/getCircleAreaRadius"]),
+                  "user/getCircleAreaRadius",
+                  "tab/getActiveTab"]),
+    activeTab(){
+        return this["tab/getActiveTab"]
+    },
     getAddresses() {
       return this["user/getAddresses"];
     },
@@ -60,10 +78,10 @@ export default {
     });
     const cityCircle = new google.maps.Circle({
       strokeColor: "#5fe3ff",
-      strokeOpacity: 0.8,
+      strokeOpacity: 0,
       strokeWeight: 2,
       fillColor: "#5fe3ff",
-      fillOpacity: 0.35,
+      fillOpacity: 0,
       map,
       center: new google.maps.LatLng(latitude, longitude),
       radius: this.getCircleAreaRadius,

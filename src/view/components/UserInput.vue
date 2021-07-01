@@ -5,20 +5,20 @@
             <div>
                 <label for="multilocation" 
                 class="label"
-                :class="{'nearby-tab-active':tabActive === 'nearby'}"
+                :class="{'nearby-tab-active':tabActive === nearby}"
                 >
                     Search By Routes
                 </label>
-                <input type="radio" value="multilocation" id="multilocation" v-model="tabActive" />
+                <input type="radio" :value="multilocation" id="multilocation" v-model="tabActive" @input="swapTab"/>
             </div>
             <div>
                 <label for="nearby"                 
                 style="border-top-right-radius: 10px"
                 class="label"
-                :class="{'multilocation-tab-active':tabActive === 'multilocation'}">
+                :class="{'multilocation-tab-active':tabActive === multilocation}">
                     Nearby Me
                 </label>
-                <input type="radio" value="nearby" id="nearby" v-model="tabActive" />
+                <input type="radio" :value="nearby" id="nearby" v-model="tabActive" @input="swapTab"/>
             </div>
         </div>
         <div v-if="tabActive === 'multilocation'">
@@ -30,10 +30,12 @@
     </div>
 </template>
 <script>
+import {mapGetters, mapActions} from 'vuex'
 import MultiLocationInput from "@/view/components/MultiLocation"
 import NearBy from "@/view/components/NearBy"
 import backgroundImg from '@/assets/mountain.jpg'
-export default{
+import {Tabs} from "@/enum/common"
+export default {
     name:"UserInput",
     components:{
         MultiLocationInput,
@@ -41,13 +43,31 @@ export default{
     },
     data(){
         return{
-            tabActive:"multilocation",
-            backgroundImg:backgroundImg
+            tabActive:null,
+            backgroundImg:backgroundImg,
+            multilocation:Tabs.multilocation,
+            nearby:Tabs.nearby
         }
     },
     methods:{
+        ...mapActions(['tab/setActive']),
         swapTab(e){
-            this.tabActive = e.target.value       
+            this["tab/setActive"](e.target.value)
+        }
+    },
+    computed:{
+        ...mapGetters(["tab/getActiveTab"]),
+        activeTab(){
+            return this["tab/getActiveTab"]
+        }
+    },
+    watch:{
+        activeTab:{
+            handler(val){
+                console.log('val',val)
+                this.tabActive = val
+            },
+            immediate:true
         }
     }
 }
