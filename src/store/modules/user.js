@@ -12,7 +12,6 @@ export default function user(http) {
         },
         originAddress: "",
         destinationAddress: "",
-        currentLocation: "",
         circleRadius: 1000
     }
 
@@ -41,9 +40,6 @@ export default function user(http) {
         getCircleAreaRadius(state) {
             return state.circleRadius
         },
-        currentLocation(state) {
-            return state.currentLocation
-        }
     }
 
     const mutations = {
@@ -98,9 +94,8 @@ export default function user(http) {
             state.circleRadius = radius
         },
 
-        setCurrentLocation(state, address) {
-            state.originAddress = address
-            state.currentLocation = address
+        setCurrentLocation(state, { formatted_address, place_id, geometry }) {
+            state.originAddress = formatted_address
         }
     }
 
@@ -134,22 +129,26 @@ export default function user(http) {
 
         async getCurrentLocation({ dispatch }) {
             const { latitude, longitude } = await currentLatAndLong();
-            dispatch('getAddressByGeometry', { latitude, longitude })
-        },
-
-        async getAddressByGeometry({ commit }, params) {
             try {
                 const result = await http.get(
-                    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${params.latitude},${params.longitude}&key=AIzaSyC4_m7mmLO59skzR9hyYEj1sgxKuHjtzo4`
+                    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyC4_m7mmLO59skzR9hyYEj1sgxKuHjtzo4`
                 );
-                const { formatted_address } = result.data.results[0];
-
+                const { formatted_address, place_id, geometry } = result.data.results[0];
                 if (result.data.error_message) throw error_message;
-                commit('setCurrentLocation', formatted_address)
+                return { formatted_address, place_id, geometry }
 
             } catch (error) {
 
             }
+        },
+
+        async placesNearMe({ commit, getters }) {
+            const params = {}
+            params.originalPos = getters["getOriginPos"]
+            params.rating = getters["getRating"]
+            params.type = getters["getType"]
+            params.radius = getters["getCircleAreaRadius"]
+            console.log("params", params)
         },
 
         listPlaces({ state, commit }, place) {

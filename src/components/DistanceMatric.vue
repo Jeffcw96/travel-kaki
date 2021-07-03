@@ -2,7 +2,7 @@
   <div class="button-container">
     <button
       class="button"
-      @click.prevent="calculateDistanceMatric"
+      @click.prevent="Search"
       :style="
         !gotOrigin && !gotDestination ? 'cursor:not-allowed' : 'cursor:pointer'
       "
@@ -15,19 +15,28 @@
 import { APIKey, RouteRadiusThreshold, MarkUpRouteDistance } from "@/enum/common";
 import placeHTML from '@/enum/content'
 import { mapGetters, mapActions, mapMutations } from "vuex";
+import {Tabs} from "@/enum/common"
 export default {
   name: "DistanceMatric",
   data() {
     return {
+      map:null,
       gotOrigin: false,
       gotDestination: false,
       markers:{},
       markerIndex:0,
       shopIndex:0,
-      allProcessedShops:[]
+      allProcessedShops:[],
+      tabActive:null
     };
   },
   watch: {
+    activeTab:{
+      handler(val){
+          this.tabActive = val
+      },
+      immediate:true
+    },
     "$store.state.user.original_location": {
       deep: true,
       handler() {
@@ -59,19 +68,31 @@ export default {
                    "user/resetLocation",
                    "user/nearby",
                    "user/placeDetails",
-                   'user/getPlaceImage']),
+                   'user/getPlaceImage',
+                   "user/placesNearMe"]),
     resetPlacesMarkers(){
         this.markers = []
-    } ,                  
+    },  
+    async Search(){
+      if(this.tabActive === Tabs.multilocation){
+        this.calculateDistanceMatric()
+      }else if(this.tabActive === Tabs.nearby){
+        this.nearByMeSearch()
+      }
+    },
+    async nearByMeSearch(){
+      this["user/placesNearMe"]()
+    },
     async calculateDistanceMatric() {
       if (!this.inputIsValid) return;
+      const {latitude,longitude} = await this.currentLatAndLong()
+      const map = this.getGoogleMap(latitude,longitude)
+
       const response = await this["user/findDistance"]();
       const result = response.data.result
       const originAddress = result.origin_addresses[0];
       const destinationAddress = result.destination_addresses[0];
-      const { latitude, longitude } = await this.currentLatAndLong();
 
-      const map = this.getGoogleMap(latitude,longitude)
       const directionsService = new google.maps.DirectionsService();
       const directionsRenderer = new google.maps.DirectionsRenderer();
       directionsService.route(
@@ -138,6 +159,7 @@ export default {
         google.maps.event.addListener(marker, "click", async () => {
           this['user/activeMarker'](i)
           map.setZoom(15);
+          console.log(marker.getPosition())
           map.setCenter(marker.getPosition());            
           const response = await this["user/placeDetails"]({placeId})
           
@@ -199,7 +221,8 @@ export default {
   },
   computed:{
     ...mapGetters(['user/getRating',
-                   'user/getType']),
+                   'user/getType',
+                   'tab/getActiveTab']),
     inputIsValid(){
       return  this.gotOrigin && this.gotDestination
     },
@@ -208,8 +231,11 @@ export default {
     },
     placeType(){
       return this['user/getType']
+    },
+    activeTab(){
+      return this["tab/getActiveTab"]
     }
-  }
+  },
 };
 </script>
 <style>

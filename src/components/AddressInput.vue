@@ -6,7 +6,7 @@
       :placeholder="placeholderLabel"
       :ref="refLabel"
       :class="classes"
-      :value="currentLocation"
+      :value="currentAddress"
     />
     <div v-if="allowNearBy" 
     class="position-absolute nearby-icon"
@@ -24,7 +24,8 @@ export default {
     return {
       addressLat: null,
       addressLng: null,
-      locationImg:locationImg
+      locationImg:locationImg,
+      currentAddress:""
     };
   },
   props: {
@@ -54,25 +55,26 @@ export default {
     }
   },
   methods: {   
-    ...mapActions(['user/getCurrentLocation']),
+    ...mapActions(['user/getAddressByGeometry',
+                  "user/updatePosition",
+                  "user/getCurrentLocation"]),
     async searchMyLocation(){
-      await this['user/getCurrentLocation']()
+     const { formatted_address, place_id, geometry }= await this['user/getCurrentLocation']()
+      this.currentAddress = formatted_address
+      const {lat,lng} = geometry.location
+      this.$emit('update-value',{lat,lng,placeId:place_id})
     }
   },
   computed: {
-    ...mapGetters(['user/currentLocation']),
     classes() {
       return this.cssClass.join(" ");
     },
     parentClasses(){
       return this.parentClass.join(" ");
     },
-    currentLocation(){
-      return this['user/currentLocation'] || ''
-    }
   },
   mounted() {
-    const autocomplete = new google.maps.places.Autocomplete(
+     const autocomplete = new google.maps.places.Autocomplete(
       this.$refs[this.refLabel],
       {
         bounds: new google.maps.LatLngBounds(new google.maps.LatLng()),
