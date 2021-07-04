@@ -20,18 +20,12 @@ router.post("/nearby", async (req, res) => {
             }
             shopsArr.push(result.data.results)
         }
-        // shopsArr.forEach(shops => {
-        //     shops.forEach(shop => {
-        //         console.log(shop.place_id)
-        //     })
-        // })
-
 
         const combinedArray = []
         shopsArr.forEach(shops => {
             shops.forEach(shop => {
                 const x = combinedArray.find(item => item.place_id === shop.place_id);
-                if (!x) {
+                if (!x && rating >= shop.rating) {
                     const placeObj = {}
                     placeObj.place_id = shop.place_id
                     placeObj.geometry = shop.geometry
@@ -44,14 +38,6 @@ router.post("/nearby", async (req, res) => {
         })
 
 
-        // const filteredArr = combinedArray.reduce((acc, current) => {
-        //     const x = acc.find(item => item.place_id === current.place_id);
-        //     if (!x) {
-        //         return acc.concat([current]);
-        //     } else {
-        //         return acc;
-        //     }
-        // }, []);
 
         res.json({ shops: combinedArray, moreShops: moreShops })
 
@@ -61,8 +47,18 @@ router.post("/nearby", async (req, res) => {
     }
 })
 
+router.post("/placesNearMe", async (req, res) => {
+    try {
+        const { address, rating, type, radius } = req.body
+        const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${address.lat},${address.lng}&type=${type}&radius=${radius}&key=${process.env.APIKey}&opennow&rankby=prominence`;
+        const result = await axios.get(URL);
+        res.json({ shops: result.data.results })
 
-
+    } catch (error) {
+        console.error(error.message)
+        res.status(500).send('SERVER ERROR')
+    }
+})
 
 
 router.get("/placedetail", async (req, res) => {

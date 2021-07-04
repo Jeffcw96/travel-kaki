@@ -144,11 +144,12 @@ export default function user(http) {
 
         async placesNearMe({ commit, getters }) {
             const params = {}
-            params.originalPos = getters["getOriginPos"]
+            params.address = getters["getOriginPos"]
             params.rating = getters["getRating"]
             params.type = getters["getType"]
             params.radius = getters["getCircleAreaRadius"]
-            console.log("params", params)
+
+            return http.post('http://localhost:3000/api/placesNearMe', params)
         },
 
         listPlaces({ state, commit }, place) {

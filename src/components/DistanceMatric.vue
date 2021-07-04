@@ -74,6 +74,8 @@ export default {
         this.markers = []
     },  
     async Search(){
+      this["user/resetLocation"]()
+      this.resetPlacesMarkers()
       if(this.tabActive === Tabs.multilocation){
         this.calculateDistanceMatric()
       }else if(this.tabActive === Tabs.nearby){
@@ -81,7 +83,20 @@ export default {
       }
     },
     async nearByMeSearch(){
-      this["user/placesNearMe"]()
+      const result = await this["user/placesNearMe"]()
+      const {lat,lng} = this.$store.state.user.original_location
+      const map = this.getGoogleMap(lat,lng)
+      const cityCircle = new google.maps.Circle({
+        strokeColor: "#5fe3ff",
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: "#5fe3ff",
+        fillOpacity: 0.35,
+        map,
+        center: new google.maps.LatLng(lat, lng),
+        radius: parseFloat(this.currentRadius)
+      });
+      this.labelMarker(result,map)
     },
     async calculateDistanceMatric() {
       if (!this.inputIsValid) return;
@@ -105,8 +120,6 @@ export default {
           if (status === "OK") {
             directionsRenderer.setDirections(response);
             directionsRenderer.setMap(map);
-            this["user/resetLocation"]()
-            this.resetPlacesMarkers()
             this.nearBySearch(response.routes[0].legs[0].steps,map)
           }
         }
@@ -222,6 +235,7 @@ export default {
   computed:{
     ...mapGetters(['user/getRating',
                    'user/getType',
+                   'user/getCircleAreaRadius',
                    'tab/getActiveTab']),
     inputIsValid(){
       return  this.gotOrigin && this.gotDestination
@@ -234,6 +248,9 @@ export default {
     },
     activeTab(){
       return this["tab/getActiveTab"]
+    },
+    currentRadius(){
+      return this["user/getCircleAreaRadius"]
     }
   },
 };

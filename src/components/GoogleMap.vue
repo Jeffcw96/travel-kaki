@@ -42,9 +42,11 @@ export default {
       deep:true
     },
     activeTab:{
-      handler(val){
+      handler(val){            
         if(this.circle){
+          console.log("val",val)
           if(val === Tabs.multilocation){
+              console.log("tab is multilocation")
               this.circle.setOptions({fillOpacity:0, strokeOpacity:0});
             return
           }
@@ -58,6 +60,7 @@ export default {
     ...mapGetters(["user/getAddresses",
                   "user/getCircleAreaRadius",
                   "tab/getActiveTab"]),
+                
     activeTab(){
         return this["tab/getActiveTab"]
     },
@@ -86,8 +89,7 @@ export default {
       center: new google.maps.LatLng(latitude, longitude),
       radius: this.getCircleAreaRadius,
     });
-    this.circle = cityCircle
-    const directionsService = new google.maps.DirectionsService();
+    this.circle = cityCircle   
   },
 };
 </script>
