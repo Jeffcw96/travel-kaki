@@ -12,6 +12,7 @@
   </div>
 </template>
 <script>
+import utils from "@/utils/common"
 import { APIKey, RouteRadiusThreshold, MarkUpRouteDistance } from "@/enum/common";
 import placeHTML from '@/enum/content'
 import { mapGetters, mapActions, mapMutations } from "vuex";
@@ -27,7 +28,8 @@ export default {
       markerIndex:0,
       shopIndex:0,
       allProcessedShops:[],
-      tabActive:null
+      tabActive:null,
+      circle:null
     };
   },
   watch: {
@@ -57,7 +59,12 @@ export default {
 
       },
     },
-               
+    getCircleAreaRadius:{
+      handler(val){
+        this.circle.setRadius(val)
+      },
+      deep:true
+    },           
   },
   methods: {
     ...mapMutations(['user/activeMarker',
@@ -94,13 +101,14 @@ export default {
         fillOpacity: 0.35,
         map,
         center: new google.maps.LatLng(lat, lng),
-        radius: parseFloat(this.currentRadius)
+        radius: this.getCircleAreaRadius
       });
+      this.circle = cityCircle
       this.labelMarker(result,map)
     },
     async calculateDistanceMatric() {
       if (!this.inputIsValid) return;
-      const {latitude,longitude} = await this.currentLatAndLong()
+      const {latitude,longitude} = await utils.currentLatAndLong()
       const map = this.getGoogleMap(latitude,longitude)
 
       const response = await this["user/findDistance"]();
@@ -179,7 +187,7 @@ export default {
           const placeDetails = response.data.result;
           let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
 
-          const formattedRating = this.roundDownNearest(placeDetails.rating,0.5)
+          const formattedRating = utils.roundDownNearest(placeDetails.rating,0.5)
           const base64ImageUrl = await this['user/getPlaceImage'](imageUrl)            
 
           let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)          
@@ -189,32 +197,11 @@ export default {
           infoWindow.setContent(output);
           infoWindow.open(map, marker);
         });
-
-
       }
       console.log(this.markers)
       console.log(this.allProcessedShops)
       this['user/listMarkers'](this.markers)
       this['user/listPlaces'](shopsArr)
-    },
-    currentLatAndLong() {
-      return new Promise((resolve, reject) => {
-        //Prompt user permission for knowing location
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            if (position.coords.latitude && position.coords.longitude) {
-              resolve({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-              });
-            }
-          },
-          (error) => {
-            reject(error.message);
-          },
-          { enableHighAccuracy: true }
-        );
-      });
     },
     getGoogleMap(latitude,longitude){
       const map = new google.maps.Map(document.getElementById("map"), {
@@ -224,13 +211,6 @@ export default {
       });
       return map
     },
-    roundDownNearest(rating,interval){
-      const floor = parseFloat(Math.floor(rating))
-      if(rating - floor < interval){
-        return floor
-      }
-      return floor+interval
-    }
   },
   computed:{
     ...mapGetters(['user/getRating',
@@ -249,8 +229,8 @@ export default {
     activeTab(){
       return this["tab/getActiveTab"]
     },
-    currentRadius(){
-      return this["user/getCircleAreaRadius"]
+    getCircleAreaRadius(){
+      return parseInt(this["user/getCircleAreaRadius"])
     }
   },
 };

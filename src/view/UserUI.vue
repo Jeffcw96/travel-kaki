@@ -23,9 +23,8 @@
 </template>
 <script>
 import backgroundImg from '@/assets/mountain.jpg'
-import DistanceMatric from "@/components/DistanceMatric";
-import PlacesDetail from "@/components/PlacesDetail"
-import AddressInput from "@/components/AddressInput";
+import DistanceMatric from "@/view/components/DistanceMatric";
+import PlacesDetail from "@/view/components/PlacesDetail"
 import MultiLocationInput from "@/view/components/MultiLocation"
 import UserInput from '@/view/components/UserInput'
 import {mapMutations, mapActions} from 'vuex'
@@ -33,7 +32,6 @@ import multiLocation from '@/schema/multiLocation'
 export default {
   name: "UserUI",
   components: {
-    AddressInput,
     DistanceMatric,
     PlacesDetail,
     MultiLocationInput,
@@ -41,7 +39,7 @@ export default {
   },
   data(){
     return{
-      menuIsActive:true,
+      menuIsActive:false,
       backgroundImg:backgroundImg,
       radius:1000
     }
@@ -61,6 +59,11 @@ export default {
     handleRadiusSlider(){
       this["user/setCircleAreaRadius"](this.radius)
     }
+  },
+  created(){
+    setTimeout(() => {
+      this.menuIsActive = true
+    }, 500);
   }
 };
 </script>
