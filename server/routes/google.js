@@ -52,13 +52,37 @@ router.post("/placesNearMe", async (req, res) => {
         const { address, rating, type, radius } = req.body
         const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${address.lat},${address.lng}&type=${type}&radius=${radius}&key=${process.env.APIKey}&opennow&rankby=prominence`;
         const result = await axios.get(URL);
-        res.json({ shops: result.data.results })
+        let shops = []
+        shops = result.data.results
+
+        async function nextTokenRequest(token) {
+            try {
+                const nextPageURL = `${URL}&pagetoken=${token}`;
+                const result = await axios.get(nextPageURL)
+                shops.push(result.data.results)
+                if (result.data.next_page_token) {
+                    nextTokenRequest(result.data.next_page_token)
+                }
+            } catch (error) {
+                console.error(error.message)
+            }
+        }
+
+        if (result.data.next_page_token) {
+            await nextTokenRequest(result.data.next_page_token)
+            res.json({ shops: shops.flat(Infinity) })
+        } else {
+            res.json({ shops: shops.flat(Infinity) })
+        }
+
+
 
     } catch (error) {
         console.error(error.message)
         res.status(500).send('SERVER ERROR')
     }
 })
+
 
 
 router.get("/placedetail", async (req, res) => {

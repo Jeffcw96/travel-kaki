@@ -36,13 +36,24 @@ export default {
     activeTab:{
       handler(val){
           this.tabActive = val
+          if(this.circle){
+            if(val === Tabs.nearby){
+              this.circle.setOptions({fillOpacity:0.35, strokeOpacity:0.8});
+            }else{
+              this.circle.setOptions({fillOpacity:0, strokeOpacity:0});
+            }
+          }
       },
       immediate:true
     },
     "$store.state.user.original_location": {
       deep: true,
-      handler() {
+      handler(location) {            
         this.gotOrigin = true;
+        if(this.tabActive === Tabs.nearby){
+          const map = this.getGoogleMap(location.lat, location.lng)
+          map.setCenter({lat:location.lat,lng:location.lng})
+        }
       },
     },
     "$store.state.user.destination_location": {
@@ -61,7 +72,10 @@ export default {
     },
     getCircleAreaRadius:{
       handler(val){
-        this.circle.setRadius(val)
+        if(this.circle){
+          this.circle.setRadius(val)
+        }
+
       },
       deep:true
     },           
@@ -93,20 +107,10 @@ export default {
       const result = await this["user/placesNearMe"]()
       const {lat,lng} = this.$store.state.user.original_location
       const map = this.getGoogleMap(lat,lng)
-      const cityCircle = new google.maps.Circle({
-        strokeColor: "#5fe3ff",
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: "#5fe3ff",
-        fillOpacity: 0.35,
-        map,
-        center: new google.maps.LatLng(lat, lng),
-        radius: this.getCircleAreaRadius
-      });
-      this.circle = cityCircle
       this.labelMarker(result,map)
     },
     async calculateDistanceMatric() {
+      if(this.circle)this.circle.setOptions({fillOpacity:0, strokeOpacity:0});
       if (!this.inputIsValid) return;
       const {latitude,longitude} = await utils.currentLatAndLong()
       const map = this.getGoogleMap(latitude,longitude)
@@ -209,6 +213,17 @@ export default {
         center: new google.maps.LatLng(latitude, longitude),
         mapTypeId: google.maps.MapTypeId.ROADMAP,
       });
+      const cityCircle = new google.maps.Circle({
+        strokeColor: "#5fe3ff",
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: "#5fe3ff",
+        fillOpacity: 0.35,
+        map,
+        center: new google.maps.LatLng(latitude, longitude),
+        radius: this.getCircleAreaRadius
+      });
+      this.circle = cityCircle
       return map
     },
   },
@@ -230,7 +245,10 @@ export default {
       return this["tab/getActiveTab"]
     },
     getCircleAreaRadius(){
-      return parseInt(this["user/getCircleAreaRadius"])
+      if(this["user/getCircleAreaRadius"]){
+        return parseInt(this["user/getCircleAreaRadius"])
+      }
+      return 0
     }
   },
 };
