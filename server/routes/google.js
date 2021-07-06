@@ -1,46 +1,17 @@
 const express = require('express')
 const router = express.Router()
 const axios = require('axios')
-
+const NearBy = require("../controller/nearby")
+const GoogleAPI = require("../controller/googleApi")
+const SKIP = undefined
 router.post("/nearby", async (req, res) => {
     try {
         const { locationsGeometry, type, rating } = req.body
-        const promises = []
-        for (let geometry of locationsGeometry) {
-            const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${geometry.lat},${geometry.lng}&type=${type}&radius=${geometry.radius}&key=${process.env.APIKey}&opennow&rankby=prominence`;
-            promises.push(axios.get(URL))
-        }
-
-        const results = await Promise.all(promises)
-        const shopsArr = []
-        const moreShops = []
-        for (let result of results) {
-            if (result.data.next_page_token) {
-                moreShops.push(result.data.next_page_token)
-            }
-            shopsArr.push(result.data.results)
-        }
-
-        const combinedArray = []
-        shopsArr.forEach(shops => {
-            shops.forEach(shop => {
-                const x = combinedArray.find(item => item.place_id === shop.place_id);
-                if (!x && rating >= shop.rating) {
-                    const placeObj = {}
-                    placeObj.place_id = shop.place_id
-                    placeObj.geometry = shop.geometry
-                    placeObj.rating = shop.rating
-                    placeObj.name = shop.name
-                    placeObj.vicinity = shop.vicinity
-                    combinedArray.push(placeObj)
-                }
-            })
-        })
-
-
-
-        res.json({ shops: combinedArray, moreShops: moreShops })
-
+        const nearBySearvice = new NearBy(locationsGeometry, "", type, rating)
+        const queryResults = await nearBySearvice.findPlacesByLocations()
+        const [shops, nextPageTokens] = nearBySearvice.cleanUpResponseResults(queryResults)
+        const result = nearBySearvice.filterShopsBy2DArray(shops)
+        res.json({ shops: result, moreShops: nextPageTokens })
     } catch (error) {
         console.error(error.message)
         res.status(500).send("SERVER ERROR")
@@ -49,33 +20,38 @@ router.post("/nearby", async (req, res) => {
 
 router.post("/placesNearMe", async (req, res) => {
     try {
-        const { address, rating, type, radius } = req.body
-        const URL = `${process.env.GoogleEndPoint}/place/nearbysearch/json?location=${address.lat},${address.lng}&type=${type}&radius=${radius}&key=${process.env.APIKey}&opennow&rankby=prominence`;
-        const result = await axios.get(URL);
-        let shops = []
-        shops = result.data.results
-
-        async function nextTokenRequest(token) {
-            try {
-                const nextPageURL = `${URL}&pagetoken=${token}`;
-                const result = await axios.get(nextPageURL)
-                shops.push(result.data.results)
-                if (result.data.next_page_token) {
-                    nextTokenRequest(result.data.next_page_token)
-                }
-            } catch (error) {
-                console.error(error.message)
-            }
+        const { address, type, radius } = req.body
+        const googleAPIService = new GoogleAPI()
+        let [shops, nextPageTokens, URL] = await googleAPIService.nearBySearch({ lat: address.lat, lng: address.lng, type, radius })
+        console.log("shop length", shops.length)
+        if (nextPageTokens && URL) {
+            const moreShops = await googleAPIService.handleNextPageQueryEnd(nextPageTokens, URL)
+            shops.push(moreShops)
         }
 
-        if (result.data.next_page_token) {
-            await nextTokenRequest(result.data.next_page_token)
-            res.json({ shops: shops.flat(Infinity) })
-        } else {
-            res.json({ shops: shops.flat(Infinity) })
-        }
+        shops = shops.flat(Infinity)
 
+        // async function nextTokenRequest(token) {
+        //     try {
+        //         const nextPageURL = `${URL}&pagetoken=${token}`;
+        //         const result = await axios.get(nextPageURL)
+        //         shops.push(result.data.results)
+        //         if (result.data.next_page_token) {
+        //             nextTokenRequest(result.data.next_page_token)
+        //         }
+        //     } catch (error) {
+        //         console.error(error.message)
+        //     }
+        // }
 
+        // if (result.data.next_page_token) {
+        //     await nextTokenRequest(result.data.next_page_token)
+        //     res.json({ shops: shops.flat(Infinity) })
+        // } else {
+        //     res.json({ shops: shops.flat(Infinity) })
+        // }
+
+        res.json({ shops })
 
     } catch (error) {
         console.error(error.message)
