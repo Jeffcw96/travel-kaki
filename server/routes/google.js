@@ -20,38 +20,25 @@ router.post("/nearby", async (req, res) => {
 
 router.post("/placesNearMe", async (req, res) => {
     try {
-        const { address, type, radius } = req.body
+        const { address, type, radius, rating } = req.body
         const googleAPIService = new GoogleAPI()
+        const nearBySearvice = new NearBy("", "", type, rating)
         let [shops, nextPageTokens, URL] = await googleAPIService.nearBySearch({ lat: address.lat, lng: address.lng, type, radius })
-        console.log("shop length", shops.length)
+
         if (nextPageTokens && URL) {
-            const moreShops = await googleAPIService.handleNextPageQueryEnd(nextPageTokens, URL)
-            shops.push(moreShops)
+            setTimeout(async () => {
+                const moreShops = await googleAPIService.handleNextPageQueryOnce(nextPageTokens, URL)
+                shops.push(moreShops)
+                shops = shops.flat(Infinity)
+                const result = nearBySearvice.filterShopsByRating(shops)
+
+                res.json({ shops: result })
+            }, 2000)
+
+        } else {
+            res.json({ shops })
         }
 
-        shops = shops.flat(Infinity)
-
-        // async function nextTokenRequest(token) {
-        //     try {
-        //         const nextPageURL = `${URL}&pagetoken=${token}`;
-        //         const result = await axios.get(nextPageURL)
-        //         shops.push(result.data.results)
-        //         if (result.data.next_page_token) {
-        //             nextTokenRequest(result.data.next_page_token)
-        //         }
-        //     } catch (error) {
-        //         console.error(error.message)
-        //     }
-        // }
-
-        // if (result.data.next_page_token) {
-        //     await nextTokenRequest(result.data.next_page_token)
-        //     res.json({ shops: shops.flat(Infinity) })
-        // } else {
-        //     res.json({ shops: shops.flat(Infinity) })
-        // }
-
-        res.json({ shops })
 
     } catch (error) {
         console.error(error.message)
@@ -64,9 +51,11 @@ router.post("/placesNearMe", async (req, res) => {
 router.get("/placedetail", async (req, res) => {
     try {
         const { placeId } = req.query
-        const URL = `${process.env.GoogleEndPoint}/place/details/json?key=${process.env.APIKey}&place_id=${placeId}`;
-        const result = await axios.get(URL);
-        res.json(result.data)
+        const googleAPIService = new GoogleAPI()
+        const result = await googleAPIService.placeDetails(placeId)
+        // const URL = `${process.env.GoogleEndPoint}/place/details/json?key=${process.env.APIKey}&place_id=${placeId}`;
+        // const result = await axios.get(URL);
+        res.json(result)
 
 
     } catch (error) {
@@ -78,15 +67,15 @@ router.get("/placedetail", async (req, res) => {
 router.get('/finddistance', async (req, res) => {
     try {
         console.log("find distance")
+        const googleAPIService = new GoogleAPI()
         const { originPlaceId, destinationPlaceId } = req.query
-        const URL = `${process.env.GoogleEndPoint}/distancematrix/json?origins=place_id:${originPlaceId}&destinations=place_id:${destinationPlaceId}&key=${process.env.APIKey}`
-        const result = await axios.get(URL);
-        console.log(result.status)
-        res.json({ result: result.data })
+        // const URL = `${process.env.GoogleEndPoint}/distancematrix/json?origins=place_id:${originPlaceId}&destinations=place_id:${destinationPlaceId}&key=${process.env.APIKey}`
+        // const result = await axios.get(URL);
+        const result = await googleAPIService.distanceMatric(originPlaceId, destinationPlaceId)
+        res.json({ result })
 
     } catch (error) {
         console.error(error.message)
-
         res.status(500).send('SERVER ERROR')
     }
 })

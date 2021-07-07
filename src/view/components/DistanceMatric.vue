@@ -12,6 +12,7 @@
   </div>
 </template>
 <script>
+import carIcon from '@/assets/car.png'
 import utils from "@/utils/common"
 import { APIKey, RouteRadiusThreshold, MarkUpRouteDistance } from "@/enum/common";
 import placeHTML from '@/enum/content'
@@ -52,6 +53,7 @@ export default {
         this.gotOrigin = true;
         if(this.tabActive === Tabs.nearby){
           const map = this.getGoogleMap(location.lat, location.lng)
+          this.circle.setOptions({fillOpacity:0.35, strokeOpacity:0.8});
           map.setCenter({lat:location.lat,lng:location.lng})
         }
       },
@@ -107,10 +109,10 @@ export default {
       const result = await this["user/placesNearMe"]()
       const {lat,lng} = this.$store.state.user.original_location
       const map = this.getGoogleMap(lat,lng)
+      this.circle.setOptions({fillOpacity:0.35, strokeOpacity:0.8});
       this.labelMarker(result,map)
     },
     async calculateDistanceMatric() {
-      if(this.circle)this.circle.setOptions({fillOpacity:0, strokeOpacity:0});
       if (!this.inputIsValid) return;
       const {latitude,longitude} = await utils.currentLatAndLong()
       const map = this.getGoogleMap(latitude,longitude)
@@ -194,8 +196,9 @@ export default {
           const formattedRating = utils.roundDownNearest(placeDetails.rating,0.5)
           const base64ImageUrl = await this['user/getPlaceImage'](imageUrl)            
 
-          let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)          
+          let output = placeHTML.replace(/{%placeName%}/g,placeDetails.name)        
           output = output.replace(`{%${formattedRating}%}`,'checked')
+          output = output.replace(/{%carIcon%}/, carIcon)  
           output = output.replace(/{%placeRouting%}/g,placeDetails.url)
           output = output.replace(/{%placeImage%}/g, base64ImageUrl.data.url)
           infoWindow.setContent(output);
@@ -215,10 +218,10 @@ export default {
       });
       const cityCircle = new google.maps.Circle({
         strokeColor: "#5fe3ff",
-        strokeOpacity: 0.8,
+        strokeOpacity: 0,
         strokeWeight: 2,
         fillColor: "#5fe3ff",
-        fillOpacity: 0.35,
+        fillOpacity: 0,
         map,
         center: new google.maps.LatLng(latitude, longitude),
         radius: this.getCircleAreaRadius

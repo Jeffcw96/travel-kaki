@@ -60,6 +60,12 @@ class NearBy {
         return result
     }
 
+    filterShopsByRating(shopsArr) {
+        return shopsArr.filter(shop => {
+            return shop.rating >= this.rating
+        })
+    }
+
 }
 
 module.exports = NearBy

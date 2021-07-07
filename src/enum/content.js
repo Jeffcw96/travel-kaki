@@ -1,6 +1,7 @@
 const content =
     `<h3 class="ui header">{%placeName%}</h3>
-            <div>Rating : 
+            <div class="content-image-container"><img src="{%placeImage%}"/></div>
+            <div style="text-align:center">
             <fieldset class="rate">
                 <input type="radio" id="rating10" name="rating" value="10" disabled {%5%}/><label for="rating10" title="5 stars"></label>
                 <input type="radio" id="rating9" name="rating" value="9" disabled {%4.5%}/><label class="half" for="rating9" title="4 1/2 stars"></label>
@@ -14,7 +15,6 @@ const content =
                 <input type="radio" id="rating1" name="rating" value="1" disabled {%0.5%}/><label class="half" for="rating1" title="1/2 star"></label>
             </fieldset>            
             </div>
-            <div><a href="{%placeRouting%}" target="_blank">Bring me here</a></div>
-            <div style="max-width:400px; margin:0 auto"><img src="{%placeImage%}" style="width:100%"/></div>`
+            <div><a href="{%placeRouting%}" target="_blank" class="flex-center anchor-label"><img src="{%carIcon%}" style="max-width:30px"/><span class="anchor-label">Bring me here</span></a></div>`
 
 module.exports = content

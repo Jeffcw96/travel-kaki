@@ -3,7 +3,7 @@ module.exports = {
     GoogleEndPoint: 'https://maps.googleapis.com/maps/api',
     HerokuProxy: 'https://cors-anywhere.herokuapp.com/',
     RouteRadiusThreshold: 1500, //this stands for Meter,
-    MarkUpRouteDistance: 10000,
+    MarkUpRouteDistance: 5000,
     Tabs: {
         multilocation: "multilocation",
         nearby: "nearby"
