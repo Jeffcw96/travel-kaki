@@ -1,5 +1,5 @@
 const axios = require("axios")
-const GoogleAPI = require("./googleApi")
+
 class NearBy {
     constructor(locations, location, type, rating) {
         this.locations = locations
