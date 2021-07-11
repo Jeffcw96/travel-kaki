@@ -106,6 +106,7 @@ export default {
       }
     },
     async nearByMeSearch(){
+      if(!this.gotOrigin) return
       const result = await this["user/placesNearMe"]()
       const {lat,lng} = this.$store.state.user.original_location
       const map = this.getGoogleMap(lat,lng)
@@ -116,14 +117,19 @@ export default {
       if (!this.inputIsValid) return;
       const {latitude,longitude} = await utils.currentLatAndLong()
       const map = this.getGoogleMap(latitude,longitude)
-
       const response = await this["user/findDistance"]();
       const result = response.data.result
       const originAddress = result.origin_addresses[0];
       const destinationAddress = result.destination_addresses[0];
 
-      const directionsService = new google.maps.DirectionsService();
       const directionsRenderer = new google.maps.DirectionsRenderer();
+      const distanceResponse = this.calculateDistanceMatric(originAddress,destinationAddress)
+      directionsRenderer.setDirections(distanceResponse);
+      directionsRenderer.setMap(map);
+      this.nearBySearch(response.routes[0].legs[0].steps,map)
+    },
+    calculatePlaceDistance(originAddress,destinationAddress){      
+      const directionsService = new google.maps.DirectionsService();
       directionsService.route(
         {
           origin: originAddress,
@@ -132,9 +138,7 @@ export default {
         },
         async (response, status) => {
           if (status === "OK") {
-            directionsRenderer.setDirections(response);
-            directionsRenderer.setMap(map);
-            this.nearBySearch(response.routes[0].legs[0].steps,map)
+            return response
           }
         }
       );
@@ -191,6 +195,7 @@ export default {
           const response = await this["user/placeDetails"]({placeId})
           
           const placeDetails = response.data.result;
+          console.log("placeDetails",placeDetails)
           let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
 
           const formattedRating = utils.roundDownNearest(placeDetails.rating,0.5)

@@ -7,7 +7,7 @@ require('dotenv').config();
 app.use(express.json({ extended: false }));
 app.use(cors());
 app.use("/api", require("./routes/google"));
-
+app.use("/user", require("./routes/auth"));
 DB()
 
 const PORT = process.env.PORT || 3000

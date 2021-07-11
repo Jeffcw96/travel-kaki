@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const bcrypt = require('bcrypt')
 
 router.post('/register', async (req, res) => {
     const user = {}
@@ -27,23 +28,18 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        res.status(400).json({ error: errors.array() })
-    }
-
     try {
         const { email, password } = req.body;
         let user = await User.findOne({ email })
 
         if (!user) {
-            res.status(400).json({ error: [{ msg: "Invalid Credentials", param: 'password' }] });
+            res.status(400).json({ error: "Invalid Credentials" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password)
 
         if (!isMatch) {
-            res.status(400).json({ error: [{ msg: "Invalid Credentials", param: 'password' }] });
+            res.status(400).json({ error: "Invalid Credentials" });
         }
 
         const payload = {

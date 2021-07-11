@@ -1,7 +1,7 @@
 const crypto = require('crypto')
 
 class Secure {
-    constructor(message, cipher, key, randomBytes, inputEncoding = "utf-8", outputEncoding = "hex") {
+    constructor(message, cipher, key, randomBytes = 14, inputEncoding = "utf-8", outputEncoding = "hex") {
         this.message = message
         this.cipher = cipher
         this.key = key
@@ -17,19 +17,23 @@ class Secure {
         return crypto.randomBytes(this.randomBytes)
     }
 
+    generateKey() {
+        return crypto.createHash('sha256').update(String(this.key)).digest('base64').substr(0, 32);
+    }
+
     encryption() {
         try {
             if (!this.message || !this.cipher || !this.key) {
                 throw new Error("Missing Crypto Params")
             }
-            const randomBytes = this.generateRandomBytes()
-            const cipher = crypto.createCipheriv(this.cipher, this.key, randomBytes)
-            let encrpted = cipher.update(this.message, this.inputEncoding, this.outputEncoding)
-            encrpted += cipher.final(this.outputEncoding)
+            const randomBytes = crypto.randomBytes(16)
+            let cipher = crypto.createCipheriv('aes-256-cbc', this.generateKey(), randomBytes)
+            let encrpted = cipher.update(this.message, "utf-8", "hex")
+            encrpted += cipher.final("hex")
 
-            return encrpted
+            return [encrpted, randomBytes]
         } catch (error) {
-            return error
+            throw new Error(error)
         }
     }
 
@@ -38,12 +42,11 @@ class Secure {
             if (!this.message || !this.cipher || !this.key) {
                 throw new Error("Missing Crypto Params")
             }
-            const randomBytes = this.generateRandomBytes()
-            const decipher = crypto.createDecipheriv(this.cipher, this.key, randomBytes)
-            let decrpted = decipher.update(this.message, this.inputEncoding, this.outputEncoding)
-            decrpted += decipher.final(this.outputEncoding)
+            const decipher = crypto.createDecipheriv('aes-256-cbc', this.generateKey(), this.randomBytes)
+            let decrpted = decipher.update(this.message, "hex", "utf-8")
+            decrpted += decipher.final("utf-8")
 
-            return decipher
+            return decrpted
         } catch (error) {
             return error
         }
