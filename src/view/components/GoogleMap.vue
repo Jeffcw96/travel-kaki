@@ -1,16 +1,30 @@
 <template>
-  <div ref="map" id="map"></div>
+  <div>
+      <div ref="map" id="map"></div>
+      <Login v-show="show"
+      @close="show=false"/>
+      <div class="login-icon" @click="show = true">
+        <img :src="userIcon"/>
+      </div>
+  </div>
 </template>
 <script>
+import userIcon from '@/assets/user.png'
 import { mapGetters } from "vuex";
 import {Tabs} from "@/enum/common"
+import Login from "@/view/components/Login"
 export default {
   name: "GoogleMap",
+  components:{
+    Login
+  },
   data(){
     return{
       circle:null,
       strokeOpacity: 0,
-      fillOpacity: 0
+      fillOpacity: 0,
+      userIcon:userIcon,
+      show:false
     }
   },
   methods: {
@@ -100,5 +114,22 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+.login-icon{
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  max-width: 30px;
+  max-height: 30px;
+  background: white;
+  padding:5px;
+  cursor: pointer;
+  z-index: 999;
+}
+
+.login-icon img{
+  width: 100%;
+  height:100%
 }
 </style>

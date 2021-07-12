@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import cookie from '@/utils/cookie'
 export default function user(http) {
     const state = {
         original_location: {},
@@ -104,18 +105,21 @@ export default function user(http) {
             return await http.get(`/api/finddistance?originPlaceId=${state.original_location.placeId}&destinationPlaceId=${state.destination_location.placeId}`)
         },
 
-        async nearby({ state, commit, getters }, { locationsGeometry }) {
-            console.log("advance geometry", state.advancedGeometry, state.advancedGeometry.length)
-            console.log('locationGeometry', locationsGeometry, locationsGeometry.length)
-
-
-
+        async nearby({ state, commit, getters, rootGetters }, { locationsGeometry }) {
             const allLocationsGeometry = [...locationsGeometry, ...state.advancedGeometry.locationsGeometry]
-            console.log(allLocationsGeometry)
+            const isLogin = rootGetters["auth/getLoginStatus"]
             const jsonObj = {}
             jsonObj.locationsGeometry = allLocationsGeometry
             jsonObj.type = getters.getType
             jsonObj.rating = getters.getRating
+
+            if (isLogin) {
+                return await http.post('http://localhost:3000/api/nearby', jsonObj, {
+                    headers: {
+                        "Authorization": "Bearer " + cookie.getCookie("token")
+                    }
+                })
+            }
             return await http.post('http://localhost:3000/api/nearby', jsonObj)
         },
 
@@ -142,14 +146,23 @@ export default function user(http) {
             }
         },
 
-        async placesNearMe({ commit, getters }) {
+        async placesNearMe({ commit, getters, rootGetters }) {
+            const isLogin = rootGetters["auth/getLoginStatus"]
             const params = {}
             params.address = getters["getOriginPos"]
             params.rating = getters["getRating"]
             params.type = getters["getType"]
             params.radius = getters["getCircleAreaRadius"]
 
-            return http.post('http://localhost:3000/api/placesNearMe', params)
+
+            if (isLogin) {
+                return await http.post('http://localhost:3000/api/placesNearMe', jsonObj, {
+                    headers: {
+                        "Authorization": "Bearer " + cookie.getCookie("token")
+                    }
+                })
+            }
+            return await http.post('http://localhost:3000/api/placesNearMe', jsonObj)
         },
 
         listPlaces({ state, commit }, place) {

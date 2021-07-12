@@ -50,12 +50,12 @@ router.post('/login', async (req, res) => {
 
         jwt.sign(payload, process.env.TOKEN, { expiresIn: 60 * 60 * 24 * 1 }, (err, token) => {
             if (err) throw (err);
-            res.json({ token: token, id: user.id })
+            res.json({ token })
         })
 
     } catch (error) {
         console.error(error.message);
-        res.status(400).json({ error: [{ msg: "DB error", param: 'password' }] })
+        res.status(400).json({ error: "Invalid Credentials" })
     }
 })
 

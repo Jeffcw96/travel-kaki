@@ -1,12 +1,16 @@
 const express = require('express')
 const router = express.Router()
+const auth = require("../middleware/auth")
 const axios = require('axios')
 const NearBy = require("../controller/nearby")
 const GoogleAPI = require("../controller/googleApi")
 const SKIP = undefined
-router.post("/nearby", async (req, res) => {
+router.post("/nearby", auth, async (req, res) => {
     try {
         const { locationsGeometry, type, rating } = req.body
+        const user = req.user
+        console.log("user", user)
+
         const nearBySearvice = new NearBy(locationsGeometry, "", type, rating)
         const queryResults = await nearBySearvice.findPlacesByLocations()
         const [shops, nextPageTokens] = nearBySearvice.cleanUpResponseResults(queryResults)

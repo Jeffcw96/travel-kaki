@@ -6,7 +6,7 @@
 </template>
 <script>
 import MultiLocation from "@/view/UserUI"
-import GoogleMap from "@/components/GoogleMap";
+import GoogleMap from "@/view/components/GoogleMap";
 import UserUI from "@/view/UserUI";
 export default {
   name: "Home",
