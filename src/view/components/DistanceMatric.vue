@@ -122,14 +122,8 @@ export default {
       const originAddress = result.origin_addresses[0];
       const destinationAddress = result.destination_addresses[0];
 
-      const directionsRenderer = new google.maps.DirectionsRenderer();
-      const distanceResponse = this.calculateDistanceMatric(originAddress,destinationAddress)
-      directionsRenderer.setDirections(distanceResponse);
-      directionsRenderer.setMap(map);
-      this.nearBySearch(response.routes[0].legs[0].steps,map)
-    },
-    calculatePlaceDistance(originAddress,destinationAddress){      
       const directionsService = new google.maps.DirectionsService();
+      const directionsRenderer = new google.maps.DirectionsRenderer();
       directionsService.route(
         {
           origin: originAddress,
@@ -138,7 +132,9 @@ export default {
         },
         async (response, status) => {
           if (status === "OK") {
-            return response
+            directionsRenderer.setDirections(response);
+            directionsRenderer.setMap(map);
+            this.nearBySearch(response.routes[0].legs[0].steps,map)
           }
         }
       );

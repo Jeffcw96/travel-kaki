@@ -3,16 +3,22 @@ const router = express.Router()
 const auth = require("../middleware/auth")
 const axios = require('axios')
 const NearBy = require("../controller/nearby")
+const User = require("../controller/user")
 const GoogleAPI = require("../controller/googleApi")
 const SKIP = undefined
 router.post("/nearby", auth, async (req, res) => {
     try {
+        let isSuperAdmin = false
         const { locationsGeometry, type, rating } = req.body
-        const user = req.user
-        console.log("user", user)
-
+        const userId = req.user ? req.user.id : null
+        if (userId) {
+            const user = new User(userId, "")
+            if (await user.verifyUserFromDB()) {
+                isSuperAdmin = true
+            }
+        }
         const nearBySearvice = new NearBy(locationsGeometry, "", type, rating)
-        const queryResults = await nearBySearvice.findPlacesByLocations()
+        const queryResults = await nearBySearvice.findPlacesByLocations(isSuperAdmin)
         const [shops, nextPageTokens] = nearBySearvice.cleanUpResponseResults(queryResults)
         const result = nearBySearvice.filterShopsBy2DArray(shops)
         res.json({ shops: result, moreShops: nextPageTokens })
@@ -70,7 +76,6 @@ router.get("/placedetail", async (req, res) => {
 
 router.get('/finddistance', async (req, res) => {
     try {
-        console.log("find distance")
         const googleAPIService = new GoogleAPI()
         const { originPlaceId, destinationPlaceId } = req.query
         // const URL = `${process.env.GoogleEndPoint}/distancematrix/json?origins=place_id:${originPlaceId}&destinations=place_id:${destinationPlaceId}&key=${process.env.APIKey}`
@@ -98,5 +103,6 @@ router.post('/placeImage', async (req, res) => {
         res.status(500).send('SERVER ERROR')
     }
 })
+
 
 module.exports = router

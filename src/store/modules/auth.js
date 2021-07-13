@@ -26,6 +26,23 @@ export default function auth(http) {
                 commit("setLogin", false)
             }
         },
+
+        async verifyUser({ commit, state }) {
+            const userToken = cookie.getCookie("token")
+            if (userToken) {
+                const result = await http.get('/verify', {
+                    headers: {
+                        "Authorization": "Bearer " + cookie.getCookie("token")
+                    }
+                })
+
+                if (!result.data.isValid) {
+                    commit("setLogin", false)
+                    return
+                }
+                commit("setLogin", result.data.isValid)
+            }
+        }
     }
 
     return {

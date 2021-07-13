@@ -1,5 +1,4 @@
 const axios = require("axios")
-
 class NearBy {
     constructor(locations, location, type, rating) {
         this.locations = locations
@@ -8,10 +7,13 @@ class NearBy {
         this.rating = rating
     }
 
-    async findPlacesByLocations() {
+    //add user role validation here for proceed heavy request
+    async findPlacesByLocations(isSuperAdmin) {
         if (!this.locations || !this.type || !this.rating) {
             throw new Error("PARAMS NOT FOUND")
         }
+        console.log("this.locations", this.locations)
+        console.log(`this.locations length`, this.locations.length)
         const promises = []
         const type = this.type
         for (let location of this.locations) {

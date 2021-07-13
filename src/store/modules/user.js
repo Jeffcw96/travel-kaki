@@ -79,12 +79,10 @@ export default function user(http) {
 
 
         activeMarker(state, activeIndex) {
-            console.log('activeMarker 123', activeIndex)
             state.activeMarkerIndex = activeIndex
         },
 
         setAdvanceGeometry(state, { locationsGeometry, radius }) {
-            console.log("locationsGeometry", locationsGeometry, radius)
             const processedlocationsGeometry = locationsGeometry.map((geometry) => {
                 return { ...geometry, radius: radius }
             })
@@ -114,21 +112,21 @@ export default function user(http) {
             jsonObj.rating = getters.getRating
 
             if (isLogin) {
-                return await http.post('http://localhost:3000/api/nearby', jsonObj, {
+                return await http.post('/api/nearby', jsonObj, {
                     headers: {
                         "Authorization": "Bearer " + cookie.getCookie("token")
                     }
                 })
             }
-            return await http.post('http://localhost:3000/api/nearby', jsonObj)
+            return await http.post('/api/nearby', jsonObj)
         },
 
         async placeDetails({ commit }, { placeId }) {
-            return await http.get(`http://localhost:3000/api/placedetail?placeId=${placeId}`)
+            return await http.get(`/api/placedetail?placeId=${placeId}`)
         },
 
         async getPlaceImage({ commit }, imageUrl) {
-            return await http.post('http://localhost:3000/api/placeImage', { imageUrl })
+            return await http.post('/api/placeImage', { imageUrl })
         },
 
         async getCurrentLocation({ dispatch }) {
@@ -156,13 +154,13 @@ export default function user(http) {
 
 
             if (isLogin) {
-                return await http.post('http://localhost:3000/api/placesNearMe', jsonObj, {
+                return await http.post('/api/placesNearMe', jsonObj, {
                     headers: {
                         "Authorization": "Bearer " + cookie.getCookie("token")
                     }
                 })
             }
-            return await http.post('http://localhost:3000/api/placesNearMe', jsonObj)
+            return await http.post('/api/placesNearMe', jsonObj)
         },
 
         listPlaces({ state, commit }, place) {

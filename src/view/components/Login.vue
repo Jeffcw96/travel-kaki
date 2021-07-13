@@ -35,6 +35,9 @@ export default {
             params.email = this.email
             params.password = this.password
             this['auth/login'](params)
+            this.email = ""
+            this.password = ""
+            this.cancel()
         },
         isValidInput(){
             if(this.email.trim().length === 0 || this.password.trim().length === 0){
