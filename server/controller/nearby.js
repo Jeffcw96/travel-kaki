@@ -12,8 +12,7 @@ class NearBy {
         if (!this.locations || !this.type || !this.rating) {
             throw new Error("PARAMS NOT FOUND")
         }
-        console.log("this.locations", this.locations)
-        console.log(`this.locations length`, this.locations.length)
+
         const promises = []
         const type = this.type
         for (let location of this.locations) {
@@ -22,6 +21,7 @@ class NearBy {
         }
 
         const results = await Promise.all(promises)
+        console.log("results", results.data)
         return results
     }
 

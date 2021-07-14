@@ -18,7 +18,8 @@
         </div>
         <UserInput />    
         <DistanceMatric />
-      <PlacesDetail/>
+      <PlacesDetail
+      @closeMenu="toggleMenu"/>
     </div>
 </template>
 <script>

@@ -106,7 +106,7 @@ export default function user(http) {
         async nearby({ state, commit, getters, rootGetters }, { locationsGeometry }) {
             const allLocationsGeometry = [...locationsGeometry, ...state.advancedGeometry.locationsGeometry]
             const isLogin = rootGetters["auth/getLoginStatus"]
-            const jsonObj = {}
+            let jsonObj = {}
             jsonObj.locationsGeometry = allLocationsGeometry
             jsonObj.type = getters.getType
             jsonObj.rating = getters.getRating
@@ -154,13 +154,13 @@ export default function user(http) {
 
 
             if (isLogin) {
-                return await http.post('/api/placesNearMe', jsonObj, {
+                return await http.post('/api/placesNearMe', params, {
                     headers: {
                         "Authorization": "Bearer " + cookie.getCookie("token")
                     }
                 })
             }
-            return await http.post('/api/placesNearMe', jsonObj)
+            return await http.post('/api/placesNearMe', params)
         },
 
         listPlaces({ state, commit }, place) {

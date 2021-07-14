@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex align-items-center">
+    <div class="d-flex align-items-center mobile-display-block">
         <component v-for="(item,fieldName) in multiLocationSchema"
         :key="item.refLabel"
         :is="item.component"

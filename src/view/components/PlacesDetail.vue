@@ -57,6 +57,7 @@ export default {
         showInfoWindow(place_id) {
             this.activeIndex = place_id;
             this['user/activeMarker'](place_id)
+            this.$emit("closeMenu")
         },
     },
     computed:{
