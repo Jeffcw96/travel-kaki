@@ -8,3 +8,17 @@ export const string = {
     }
 
 }
+
+export const number = {
+    range: function (min, max) {
+        return function (value) {
+            if (value < min || value > max) {
+                return `Please enter between ${min} to ${max}`
+            }
+            return true
+        }
+    }
+}
+
+
+

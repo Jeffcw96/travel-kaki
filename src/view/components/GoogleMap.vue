@@ -58,9 +58,7 @@ export default {
     activeTab:{
       handler(val){            
         if(this.circle){
-          console.log("val",val)
           if(val === Tabs.multilocation){
-              console.log("tab is multilocation")
               this.circle.setOptions({fillOpacity:0, strokeOpacity:0});
             return
           }

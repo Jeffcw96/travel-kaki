@@ -3,7 +3,7 @@ import AddressInput from '@/components/AddressInput'
 import Slider from '@/components/Slider'
 import Dropdown from '@/components/Dropdown'
 import TextBox from '@/components/TextBox'
-import { string } from '@/validations/common'
+import { string, number } from '@/validations/common'
 
 export default {
     original_location: {
@@ -38,9 +38,11 @@ export default {
         cssClass: ['px-10', 'py-10', 'w-200', 'border-standard', 'd-block'],
         parentClass: ['text-left', 'font-white'],
         onlyNumber: true,
-        decimalPlaces: 1,
+        decimalPlaces: 2,
+        min: 1,
+        max: 5,
         numberFormat: [],
-        validations: [string.isRequired]
+        validations: [number.range(1, 5)]
     },
     radius: {
         component: Slider,

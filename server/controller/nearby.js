@@ -12,7 +12,7 @@ class NearBy {
         if (!this.locations || !this.type || !this.rating) {
             throw new Error("PARAMS NOT FOUND")
         }
-
+        console.log("findPlacesByLocations")
         const promises = []
         const type = this.type
         for (let location of this.locations) {
@@ -21,7 +21,6 @@ class NearBy {
         }
 
         const results = await Promise.all(promises)
-        console.log("results", results.data)
         return results
     }
 
@@ -47,7 +46,7 @@ class NearBy {
         shopsArr.forEach(shops => {
             shops.forEach(shop => {
                 const x = result.find(item => item.place_id === shop.place_id);
-                if (!x && this.rating >= shop.rating) {
+                if (!x && shop.rating >= this.rating) {
                     const placeObj = {}
                     placeObj.place_id = shop.place_id
                     placeObj.geometry = shop.geometry

@@ -7,12 +7,15 @@
       @input="handleInput"
       :ref="refLabel"
       :class="classes"
-      :blur="runValidation"
       v-model="inputVal"
     />
+    <div class="error-message">
+      {{errors[0]}}
+    </div>
   </div>
 </template>
 <script>
+import {removeValidation} from '@/validations/common'
 export default {
   name: "TextBox",
   props: {
@@ -47,7 +50,15 @@ export default {
     validations:{
         type:Array,
         default:[]
-    }
+    },
+    min:{
+      type:Number,
+      default:1
+    },
+    max:{
+      type:Number,
+      default:5
+    },
   },
   data() {
     return {
@@ -59,11 +70,21 @@ export default {
   methods: {    
     handleInput() {
       if(this.onlyNumber){
-        this.inputVal = parseFloat(this.inputVal)
+        this.inputVal = parseFloat(this.inputVal)                
       }
-
-      console.log("this.inputVal", typeof(this.inputVal))
+      this.runValidation()
       this.$emit("update-value",this.inputVal)
+    },
+    runValidation(){
+      this.validations.forEach(validation =>{
+          const validationResult = validation(this.inputVal)
+          if(validationResult === true){
+            this.errors = []
+          }else{
+            this.errors.push(validationResult)
+          }
+          this.$emit('update-validation',this.errors)
+      })
     },
   },
   computed: {
@@ -72,15 +93,6 @@ export default {
     },
     parentClasses(){
       return this.parentClass.join(" ");
-    },
-    runValidation(){
-        this.validations.forEach(validation =>{
-            const error = validation(this.inputLabel,this.inputVal)
-            console.log(error)
-            this.errors.push(error)
-        })
-
-        console.log("this.errors",this.errors)
     },
     inputType(){
       if(this.onlyNumber){

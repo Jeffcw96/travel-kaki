@@ -135,6 +135,12 @@ input{
     color: white;
 }
 
+.error-message{
+    color: #ff3636;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
 @media screen and (max-width:600px){
     .user-ui-container{
         background-size:initial;

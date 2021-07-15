@@ -1,14 +1,15 @@
 <template>
-    <div class="d-flex align-items-center mobile-display-block">
+    <div class="d-flex  mobile-display-block">
         <component v-for="(item,fieldName) in multiLocationSchema"
         :key="item.refLabel"
         :is="item.component"
         v-bind="item"
-        @update-value="handleInput($event,fieldName,item.type)" />
+        @update-value="handleInput($event,fieldName,item.type)"
+        @update-validation="updateValidation($event,fieldName)" />
     </div>
 </template>
 <script>
-import {mapMutations} from 'vuex'
+import {mapMutations,mapActions} from 'vuex'
 import {  INPUT, DROPDOWN } from '@/enum/common'
 import multiLocation from '@/schema/multiLocation'
 export default {
@@ -21,6 +22,7 @@ export default {
     methods:{
         ...mapMutations(["user/updatePosition",
                     "user/updateConfiguration"]),
+        ...mapActions(["validation/updateValidation"]),
         handleInput(value,fieldName,type){
             if(type=== INPUT){
                 this["user/updatePosition"]({
@@ -37,7 +39,9 @@ export default {
                     value
             });
         },
-
+        updateValidation(value,fieldName){
+            this["validation/updateValidation"]({key:fieldName,value})
+        }
     }
 
 

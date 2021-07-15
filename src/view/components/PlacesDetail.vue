@@ -42,8 +42,7 @@ export default {
         },
         "$store.state.user.activeMarkerIndex": {
         deep: true,
-            handler(activeMarkerIndex) {      
-                console.log("active marker in side nav",activeMarkerIndex)         
+            handler(activeMarkerIndex) {            
                 this.activeIndex = activeMarkerIndex
                 const el = this.$refs[`marker-${activeMarkerIndex}`]               
                 if (el) {

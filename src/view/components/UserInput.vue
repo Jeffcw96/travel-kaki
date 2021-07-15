@@ -30,7 +30,7 @@
     </div>
 </template>
 <script>
-import {mapGetters, mapActions} from 'vuex'
+import {mapGetters, mapActions,mapMutations} from 'vuex'
 import MultiLocationInput from "@/view/components/MultiLocation"
 import NearBy from "@/view/components/NearBy"
 import backgroundImg from '@/assets/mountain.jpg'
@@ -50,8 +50,10 @@ export default {
         }
     },
     methods:{
+        ...mapMutations(["validation/resetValidation"]),
         ...mapActions(['tab/setActive']),
         swapTab(e){
+            this["validation/resetValidation"]()
             this["tab/setActive"](e.target.value)
         }
     },
@@ -64,7 +66,6 @@ export default {
     watch:{
         activeTab:{
             handler(val){
-                console.log('val',val)
                 this.tabActive = val
             },
             immediate:true

@@ -54,7 +54,6 @@ export default function user(http) {
             }
         },
         updateConfiguration(state, { fieldName, value }) {
-            console.log("fieldName", fieldName, "typeof", typeof (value))
             Vue.set(state.configurations, fieldName, value)
         },
         setProfile(state, data) {
@@ -192,9 +191,6 @@ function currentLatAndLong() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 if (position.coords.latitude && position.coords.longitude) {
-                    console.log(
-                        position.coords.latitude && position.coords.longitude
-                    );
                     resolve({
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude,

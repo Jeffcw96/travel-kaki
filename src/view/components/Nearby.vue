@@ -1,15 +1,17 @@
 <template>
-    <div class="d-flex align-items-center mobile-display-block">
+    <div class="d-flex  mobile-display-block">
         <component v-for="(item,fieldName) in nearbySchema"
         :key="item.refLabel"
         :is="item.component"
+        :ref="item.refLabel"
         v-bind="item"
-        @update-value="handleInput($event,fieldName,item.type)" />
+        @update-value="handleInput($event,fieldName,item.type)"
+        @update-validation="updateValidation($event,fieldName)" />
     </div>
 </template>
 
 <script>
-import {mapMutations} from 'vuex'
+import {mapMutations,mapActions} from 'vuex'
 import {  INPUT, SLIDER } from '@/enum/common'
 import nearby from '@/schema/nearby'
 
@@ -24,6 +26,7 @@ export default {
         ...mapMutations(["user/updatePosition",
                     "user/updateConfiguration",
                     "user/setCircleAreaRadius"]),
+        ...mapActions(["validation/updateValidation"]),                    
         handleInput(value,fieldName,type){
             if(type=== INPUT){
                 this["user/updatePosition"]({
@@ -44,13 +47,10 @@ export default {
                     value
             });
         },
-
+        updateValidation(value,fieldName){
+            this["validation/updateValidation"]({key:fieldName,value})
+        }
     },
-    beforeDestroy(){
-        console.log("before destroy hook")
-    }
-
-
 }
 
 </script>

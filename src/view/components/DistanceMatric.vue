@@ -4,7 +4,7 @@
       class="button"
       @click.prevent="Search"
       :style="
-        !gotOrigin && !gotDestination ? 'cursor:not-allowed' : 'cursor:pointer'
+        (!gotOrigin && !gotDestination) || !validationIsValid ? 'cursor:not-allowed' : 'cursor:pointer'
       "
     >
       Search
@@ -67,7 +67,6 @@ export default {
     "$store.state.user.activeMarkerIndex": {
       deep: true,
       handler(activeMarkerIndex) {
-        console.log('all markers',this.markers)
          new google.maps.event.trigger(this.markers[activeMarkerIndex], "click");
 
       },
@@ -97,6 +96,7 @@ export default {
         this.markers = []
     },  
     async Search(){
+      if(!this['validation/isValid']) return
       this["user/resetLocation"]()
       this.resetPlacesMarkers()
       if(this.tabActive === Tabs.multilocation){
@@ -186,12 +186,10 @@ export default {
         google.maps.event.addListener(marker, "click", async () => {
           this['user/activeMarker'](i)
           map.setZoom(15);
-          console.log(marker.getPosition())
           map.setCenter(marker.getPosition());            
           const response = await this["user/placeDetails"]({placeId})
           
           const placeDetails = response.data.result;
-          console.log("placeDetails",placeDetails)
           let imageUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${placeDetails.photos[0].photo_reference}&key=${APIKey}`;;                  
 
           const formattedRating = utils.roundDownNearest(placeDetails.rating,0.5)
@@ -206,8 +204,7 @@ export default {
           infoWindow.open(map, marker);
         });
       }
-      console.log(this.markers)
-      console.log(this.allProcessedShops)
+
       this['user/listMarkers'](this.markers)
       this['user/listPlaces'](shopsArr)
     },
@@ -235,7 +232,8 @@ export default {
     ...mapGetters(['user/getRating',
                    'user/getType',
                    'user/getCircleAreaRadius',
-                   'tab/getActiveTab']),
+                   'tab/getActiveTab',
+                   'validation/isValid']),
     inputIsValid(){
       return  this.gotOrigin && this.gotDestination
     },
@@ -247,6 +245,9 @@ export default {
     },
     activeTab(){
       return this["tab/getActiveTab"]
+    },
+    validationIsValid(){
+      return this['validation/isValid']
     },
     getCircleAreaRadius(){
       if(this["user/getCircleAreaRadius"]){
