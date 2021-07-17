@@ -32,7 +32,7 @@
 <script>
 import {mapGetters, mapActions,mapMutations} from 'vuex'
 import MultiLocationInput from "@/view/components/MultiLocation"
-import NearBy from "@/view/components/NearBy"
+import NearBy from "@/view/components/nearby"
 import backgroundImg from '@/assets/mountain.jpg'
 import {Tabs} from "@/enum/common"
 export default {

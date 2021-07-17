@@ -16,7 +16,7 @@ import {  INPUT, SLIDER } from '@/enum/common'
 import nearby from '@/schema/nearby'
 
 export default {
-    name:"Nearby",
+    name:"nearby",
     computed:{
         nearbySchema(){
             return nearby
