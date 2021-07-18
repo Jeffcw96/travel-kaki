@@ -42,6 +42,10 @@ export default function auth(http) {
                 }
                 commit("setLogin", result.data.isValid)
             }
+        },
+
+        async fireConnection() {
+            await http.get("/connection")
         }
     }
 

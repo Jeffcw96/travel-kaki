@@ -8,7 +8,8 @@ import './assets/style.css';
 import axios from 'axios'
 Vue.config.productionTip = false
 let vuexStore = store(axios.create({
-  baseURL: "http://localhost:3000"
+  // baseURL: "http://localhost:3000/"
+  baseURL: "https://travel-kaki.herokuapp.com/"
 }));
 /* eslint-disable no-new */
 new Vue({
