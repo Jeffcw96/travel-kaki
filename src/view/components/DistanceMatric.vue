@@ -2,12 +2,16 @@
   <div class="button-container">
     <button
       class="button"
+      :class="{'spinner-container' : isLoading }"
       @click.prevent="Search"
       :style="
         (!gotOrigin && !gotDestination) || !validationIsValid ? 'cursor:not-allowed' : 'cursor:pointer'
       "
     >
-      Search
+       <span class="material spinner" v-show="isLoading"></span>
+      <div v-show="!isLoading">
+        Search
+      </div>      
     </button>
   </div>
 </template>
@@ -30,7 +34,8 @@ export default {
       shopIndex:0,
       allProcessedShops:[],
       tabActive:null,
-      circle:null
+      circle:null,
+      isLoading:false
     };
   },
   watch: {
@@ -99,6 +104,7 @@ export default {
       if(!this['validation/isValid']) return
       this["user/resetLocation"]()
       this.resetPlacesMarkers()
+      this.isLoading = true
       if(this.tabActive === Tabs.multilocation){
         this.calculateDistanceMatric()
       }else if(this.tabActive === Tabs.nearby){
@@ -207,6 +213,7 @@ export default {
 
       this['user/listMarkers'](this.markers)
       this['user/listPlaces'](shopsArr)
+      this.isLoading = false
     },
     getGoogleMap(latitude,longitude){
       const map = new google.maps.Map(document.getElementById("map"), {
@@ -312,7 +319,9 @@ input:checked ~ label
   font-weight: bold;
   font-size: 1rem;
   letter-spacing: 2px;
-  font-family: 'Roboto', sans-serif
+  font-family: 'Roboto', sans-serif;
+  min-width: 90px;
+  min-height: 30px;
 }
 
 .advance-search{
@@ -322,4 +331,31 @@ input:checked ~ label
   cursor: pointer;
 }
 
+.spinner-container {
+  position: relative;
+  letter-spacing: 0.5px;
+}
+
+.spinner::after {
+  content: '';
+  box-sizing: border-box;
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  top: calc(50% - 13px);
+  left: calc(50% - 10px);
+  border-radius: 50%;
+} 
+
+.spinner.material::after {
+  border-top: 4px solid rgba(255, 255, 255, 1.0);
+  border-left: 4px solid rgba(255, 255, 255, 1.0);
+  border-bottom: 4px solid rgba(255, 255, 255, 1.0);
+  border-right: 4px solid rgba(255, 255, 255, 0.0);
+  animation: spinner .6s linear infinite;
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
 </style>
